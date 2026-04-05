@@ -13,7 +13,7 @@
 | Abir Mahmood | [Profile](https://github.com/abirmahmood6) |
 | Anthony Carmona | [Profile](https://github.com/AnthonyC247) |
 | Bledar Ndoni | [Profile](https://github.com/BlediN) |
-| Joel C Molina | TBA |
+| Joel C Molina | [Profile] (https://github.com/JoelCMol) |
 
 ---
 
