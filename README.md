@@ -21,7 +21,7 @@
 
 ### Description and Purpose
 
-LayoffLens is a community-sourced website where people share and browse real layoff stories. Users can see what severance package (the pay and benefits a company gives you when they let you go) others received, how long their job search took, and what the overall experience was like. Anyone can browse freely without an account — you only need to sign in with a work email to post a story. This keeps the data honest and tied to real people in the industry. The site also pulls in live layoff news so there is always fresh content even as the community grows. The purpose is to give tech workers a reliable, community-driven resource so no one has to navigate a layoff alone or uninformed.
+LayoffLens is a community-sourced website where people share and browse real layoff stories. Users can see what severance package (the pay and benefits a company gives you when they let you go) others received, how long their job search took, and what the overall experience was like. Anyone can browse freely without an account — you only need to sign in & authenticate to post a story. This keeps the data honest and tied to real people in the industry. The site also pulls in live layoff news so there is always fresh content even as the community grows. The purpose is to give tech workers a reliable, community-driven resource so no one has to navigate a layoff alone or uninformed.
 
 ### Inspiration
 
@@ -29,9 +29,10 @@ Tech layoffs have been relentless since 2022 and show no signs of slowing down. 
 
 ## Tech Stack
 
-Frontend: React, React Router
+Frontend: *To be finalized*
+Backend: *To be finalized*
 
-Backend: Node.js, Express.js, PostgreSQL
+---
 
 ## Features
 
@@ -43,25 +44,19 @@ View all community-submitted layoff stories on the main feed. Each entry shows t
 
 ### Submit Your Story
 
-Sign in with a work email and post your own layoff experience. The form validates your entry before saving — no negative severance, no future dates, and all required fields must be filled in.
+Sign in with an account and post your own layoff experience. The form validates your entry before saving — no negative severance, no future dates, and all required fields must be filled in.
+
+[gif goes here]
+
+### Authentication
+
+Anyone can browse the site. To post a story, users must be authenticated. Users may choose to remain anonymous when submitting posts.
 
 [gif goes here]
 
 ### Filter and Sort
 
 On the feed page, narrow down stories by company name, industry, job type, or year. Sort by severance length or newest post first.
-
-[gif goes here]
-
-### News Page
-
-A live feed of the latest layoff headlines pulled from a news API. Always up to date, no manual work needed.
-
-[gif goes here]
-
-### Work Email Login
-
-Anyone can browse the site. To post a story, users must sign in with a work email. This keeps submissions tied to real people in the industry.
 
 [gif goes here]
 
@@ -89,6 +84,12 @@ A dev-only option that wipes the database and reloads the original sample data. 
 
 [gif goes here]
 
+### News Page *(Stretch Feature)*
+
+A live feed of the latest layoff headlines pulled from a news API. This feature will be implemented after core community functionality is complete.
+
+[gif goes here]
+
 ## Installation Instructions
 
-[coming soon]
+coming soon
