@@ -21,19 +21,12 @@
 
 ### Description and Purpose
 
-LayoffLens is a community-sourced website where people share and browse real layoff stories. Users can see what severance package (the pay and benefits a company gives you when they let you go) others received, how long their job search took, and what the overall experience was like. Anyone can browse freely without an account — you only need to sign in & authenticate to post a story. This keeps the data honest and tied to real people in the industry. The site also pulls in live layoff news so there is always fresh content even as the community grows. The purpose is to give tech workers a reliable, community-driven resource so no one has to navigate a layoff alone or uninformed.
+LayoffLens is a community-sourced website where people share and browse real layoff stories. Users can see what severance package (the pay and benefits a company gives you when they let you go) others received, how long their job search took, and what the overall experience was like. Anyone can browse freely without an account — you only need to sign in & authenticate to post a story. This keeps the data honest and tied to real people in the industry. The site also pulls in live layoff news so there is always fresh content even as the community grows. The purpose is to give tech workers a reliable, community-driven resource so no one has to navigate a layoff alone or without reliable information.
 
 ### Inspiration
 
 Tech layoffs have been relentless since 2022 and show no signs of slowing down. When someone gets laid off, they have no idea if their severance is fair, how long finding a new job will realistically take, or what to expect from the process. The only places to look are messy Reddit threads and vague Glassdoor reviews that are hard to search through. We wanted to build one clean, honest, structured place where people can share and look up real layoff experiences — and actually find the information they need.
 
-## Tech Stack
-
-Frontend: *To be finalized*
-
-Backend: *To be finalized*
-
----
 
 ## Features
 
@@ -49,9 +42,9 @@ Sign in with an account and post your own layoff experience. The form validates 
 
 [gif goes here]
 
-### Authentication
+### Sign in to post a story
 
-Anyone can browse the site. To post a story, users must be authenticated. Users may choose to remain anonymous when submitting posts.
+Anyone can browse the site. To post a story, users must sign in and authenticated. Users may choose to remain anonymous when submitting posts.
 
 [gif goes here]
 
