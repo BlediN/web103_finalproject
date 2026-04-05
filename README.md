@@ -42,9 +42,9 @@ Sign in with an account and post your own layoff experience. The form validates 
 
 [gif goes here]
 
-### Sign in to post a story
+### Sign in to post a story (Authentication)
 
-Anyone can browse the site. To post a story, users must sign in and authenticated. Users may choose to remain anonymous when submitting posts.
+Anyone can browse the site. To post a story, users must sign in and be authenticated. Users may choose to remain anonymous when submitting posts.
 
 [gif goes here]
 
