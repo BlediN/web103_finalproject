@@ -30,6 +30,7 @@ Tech layoffs have been relentless since 2022 and show no signs of slowing down. 
 ## Tech Stack
 
 Frontend: *To be finalized*
+
 Backend: *To be finalized*
 
 ---
