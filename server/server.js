@@ -1,5 +1,6 @@
 import express from "express";
 import cors from "cors";
+import entriesRoutes from "./routes/entries.js";
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -8,8 +9,10 @@ app.use(cors());
 app.use(express.json());
 
 app.get("/", (req, res) => {
-  res.status(200).send("<h1>LayoffLens API running</h1>");
+  res.status(200).send("LayoffLens API is running");
 });
+
+app.use("/api/entries", entriesRoutes);
 
 app.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);
