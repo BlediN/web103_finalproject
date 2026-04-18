@@ -39,7 +39,12 @@ export default function FeedPage() {
             </h3>
             <p>{entry.summary}</p>
             <small>
-              {entry.location} • {entry.job_type}
+              {entry.location} • {entry.job_type} • Laid off:{" "}
+              {new Date(entry.layoff_date).toLocaleDateString("en-US", {
+                year: "numeric",
+                month: "short",
+                day: "numeric",
+              })}
             </small>
           </div>
         ))
