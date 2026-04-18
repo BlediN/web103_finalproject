@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 
@@ -17,6 +17,23 @@ export default function SubmitEntryPage() {
     is_anonymous: false,
     summary: "",
   });
+
+  // ✅ NEW: companies state
+  const [companies, setCompanies] = useState([]);
+
+  // ✅ NEW: fetch companies from backend
+  useEffect(() => {
+    const fetchCompanies = async () => {
+      try {
+        const response = await axios.get("http://localhost:3001/api/companies");
+        setCompanies(response.data);
+      } catch (error) {
+        console.error("Error fetching companies:", error);
+      }
+    };
+
+    fetchCompanies();
+  }, []);
 
   const handleChange = (event) => {
     const { name, value, type, checked } = event.target;
@@ -67,9 +84,13 @@ export default function SubmitEntryPage() {
             required
           >
             <option value="">Select company</option>
-            <option value="1">Meta</option>
-            <option value="2">Google</option>
-            <option value="3">Stripe</option>
+
+            {/* ✅ NEW: dynamic companies */}
+            {companies.map((company) => (
+              <option key={company.id} value={company.id}>
+                {company.name}
+              </option>
+            ))}
           </select>
         </label>
 
