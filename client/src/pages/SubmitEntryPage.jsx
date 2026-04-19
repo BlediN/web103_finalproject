@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import "./SubmitEntryPage.css";
 
 import Step1Intro from "../components/submit/Step1Intro";
 import Step2CompanyRole from "../components/submit/Step2CompanyRole";
@@ -104,17 +105,16 @@ export default function SubmitEntryPage() {
   };
 
   return (
-    <div style={{ marginTop: "2rem" }}>
-      {errorMessage && (
-        <p style={{ color: "crimson", marginBottom: "1rem" }}>{errorMessage}</p>
-      )}
+  <div className="wrapper">
+    {errorMessage && (
+      <p style={{ color: "crimson", marginBottom: "1rem" }}>
+        {errorMessage}
+      </p>
+    )}
 
+    <div className="card">
       {step === 1 && (
-        <Step1Intro
-          nextStep={nextStep}
-          currentStep={step}
-          totalSteps={4}
-        />
+        <Step1Intro nextStep={nextStep} currentStep={step} totalSteps={4} />
       )}
 
       {step === 2 && (
@@ -151,5 +151,6 @@ export default function SubmitEntryPage() {
         />
       )}
     </div>
-  );
+  </div>
+);
 }

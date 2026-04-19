@@ -8,25 +8,19 @@ export default function Step2CompanyRole({
   totalSteps,
 }) {
   return (
-    <div style={{ marginTop: "2rem" }}>
-      <p style={{ fontSize: "0.95rem", color: "#666" }}>
+    <>
+      <p className="step-text">
         Step {currentStep} of {totalSteps}
       </p>
 
-      <h1>Company + Role Information</h1>
-      <p>Tell us where you worked and what role was affected.</p>
+      <h1 className="title">Company + Role</h1>
+      <p className="subtitle">
+        Tell us where you worked and your role.
+      </p>
 
-      <div
-        style={{
-          display: "flex",
-          flexDirection: "column",
-          gap: "1rem",
-          marginTop: "1.5rem",
-          maxWidth: "500px",
-        }}
-      >
-        <label>
-          Company
+      <div style={{ marginTop: "1.5rem", display: "flex", flexDirection: "column", gap: "1rem" }}>
+        <div className="form-group">
+          <label>Company</label>
           <select
             name="company_id"
             value={formData.company_id}
@@ -40,10 +34,10 @@ export default function Step2CompanyRole({
               </option>
             ))}
           </select>
-        </label>
+        </div>
 
-        <label>
-          Role / Job Title
+        <div className="form-group">
+          <label>Role</label>
           <input
             type="text"
             name="role"
@@ -52,10 +46,10 @@ export default function Step2CompanyRole({
             placeholder="e.g. Frontend Engineer"
             required
           />
-        </label>
+        </div>
 
-        <label>
-          Job Type
+        <div className="form-group">
+          <label>Job Type</label>
           <select
             name="job_type"
             value={formData.job_type}
@@ -68,13 +62,13 @@ export default function Step2CompanyRole({
             <option value="Part-time">Part-time</option>
             <option value="Internship">Internship</option>
           </select>
-        </label>
+        </div>
       </div>
 
-      <div style={{ display: "flex", gap: "1rem", marginTop: "1.5rem" }}>
+      <div className="button-row">
         <button onClick={prevStep}>Back</button>
         <button onClick={nextStep}>Next</button>
       </div>
-    </div>
+    </>
   );
 }

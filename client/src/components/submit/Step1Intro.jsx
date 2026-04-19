@@ -1,18 +1,19 @@
 export default function Step1Intro({ nextStep, currentStep, totalSteps }) {
   return (
-    <div style={{ marginTop: "2rem" }}>
-      <p style={{ fontSize: "0.95rem", color: "#666" }}>
+    <>
+      <p className="step-text">
         Step {currentStep} of {totalSteps}
       </p>
 
-      <h1>Submit Your Layoff Story</h1>
-      <p>
-        This short form will guide you through sharing your layoff experience.
+      <h1 className="title">Submit Your Layoff Story</h1>
+      <p className="subtitle">
+        This short form will guide you through sharing your experience.
       </p>
 
-      <div style={{ marginTop: "1.5rem" }}>
+      <div className="button-row">
+        <div />
         <button onClick={nextStep}>Start</button>
       </div>
-    </div>
+    </>
   );
 }
