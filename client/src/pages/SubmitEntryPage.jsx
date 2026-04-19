@@ -2,8 +2,17 @@ import { useState, useEffect } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 
+import Step1Intro from "../components/submit/Step1Intro";
+import Step2CompanyRole from "../components/submit/Step2CompanyRole";
+import Step3LayoffDetails from "../components/submit/Step3LayoffDetails";
+import Step4Review from "../components/submit/Step4Review";
+
 export default function SubmitEntryPage() {
   const navigate = useNavigate();
+
+  const [step, setStep] = useState(1);
+  const [companies, setCompanies] = useState([]);
+  const [errorMessage, setErrorMessage] = useState("");
 
   const [formData, setFormData] = useState({
     user_id: 1,
@@ -18,10 +27,6 @@ export default function SubmitEntryPage() {
     summary: "",
   });
 
-  // ✅ NEW: companies state
-  const [companies, setCompanies] = useState([]);
-
-  // ✅ NEW: fetch companies from backend
   useEffect(() => {
     const fetchCompanies = async () => {
       try {
@@ -29,6 +34,7 @@ export default function SubmitEntryPage() {
         setCompanies(response.data);
       } catch (error) {
         console.error("Error fetching companies:", error);
+        setErrorMessage("Failed to load companies.");
       }
     };
 
@@ -44,8 +50,43 @@ export default function SubmitEntryPage() {
     }));
   };
 
-  const handleSubmit = async (event) => {
-    event.preventDefault();
+  const nextStep = () => {
+    setErrorMessage("");
+
+    if (step === 2) {
+      if (!formData.company_id || !formData.role || !formData.job_type) {
+        setErrorMessage("Please complete all fields before continuing.");
+        return;
+      }
+    }
+
+    if (step === 3) {
+      if (
+        !formData.location ||
+        !formData.layoff_date ||
+        formData.severance_weeks === "" ||
+        formData.job_search_weeks === "" ||
+        !formData.summary
+      ) {
+        setErrorMessage("Please complete all fields before continuing.");
+        return;
+      }
+    }
+
+    setStep((prev) => prev + 1);
+  };
+
+  const prevStep = () => {
+    setErrorMessage("");
+    setStep((prev) => prev - 1);
+  };
+
+  const selectedCompany = companies.find(
+    (company) => String(company.id) === String(formData.company_id)
+  );
+
+  const handleSubmit = async () => {
+    setErrorMessage("");
 
     try {
       await axios.post("http://localhost:3001/api/entries", {
@@ -58,136 +99,57 @@ export default function SubmitEntryPage() {
       navigate("/");
     } catch (error) {
       console.error("Error submitting entry:", error);
+      setErrorMessage("Failed to submit entry. Please try again.");
     }
   };
 
   return (
     <div style={{ marginTop: "2rem" }}>
-      <h1>Submit Entry</h1>
-      <p>Share your layoff experience.</p>
+      {errorMessage && (
+        <p style={{ color: "crimson", marginBottom: "1rem" }}>{errorMessage}</p>
+      )}
 
-      <form
-        onSubmit={handleSubmit}
-        style={{
-          display: "flex",
-          flexDirection: "column",
-          gap: "1rem",
-          marginTop: "1.5rem",
-        }}
-      >
-        <label>
-          Company
-          <select
-            name="company_id"
-            value={formData.company_id}
-            onChange={handleChange}
-            required
-          >
-            <option value="">Select company</option>
+      {step === 1 && (
+        <Step1Intro
+          nextStep={nextStep}
+          currentStep={step}
+          totalSteps={4}
+        />
+      )}
 
-            {/* ✅ NEW: dynamic companies */}
-            {companies.map((company) => (
-              <option key={company.id} value={company.id}>
-                {company.name}
-              </option>
-            ))}
-          </select>
-        </label>
+      {step === 2 && (
+        <Step2CompanyRole
+          formData={formData}
+          handleChange={handleChange}
+          nextStep={nextStep}
+          prevStep={prevStep}
+          companies={companies}
+          currentStep={step}
+          totalSteps={4}
+        />
+      )}
 
-        <label>
-          Role
-          <input
-            type="text"
-            name="role"
-            value={formData.role}
-            onChange={handleChange}
-            required
-          />
-        </label>
+      {step === 3 && (
+        <Step3LayoffDetails
+          formData={formData}
+          handleChange={handleChange}
+          nextStep={nextStep}
+          prevStep={prevStep}
+          currentStep={step}
+          totalSteps={4}
+        />
+      )}
 
-        <label>
-          Job Type
-          <select
-            name="job_type"
-            value={formData.job_type}
-            onChange={handleChange}
-            required
-          >
-            <option value="">Select job type</option>
-            <option value="Full-time">Full-time</option>
-            <option value="Contract">Contract</option>
-            <option value="Part-time">Part-time</option>
-            <option value="Internship">Internship</option>
-          </select>
-        </label>
-
-        <label>
-          Location
-          <input
-            type="text"
-            name="location"
-            value={formData.location}
-            onChange={handleChange}
-            required
-          />
-        </label>
-
-        <label>
-          Date of Layoff
-          <input
-            type="date"
-            name="layoff_date"
-            value={formData.layoff_date}
-            onChange={handleChange}
-            required
-          />
-        </label>
-
-        <label>
-          Severance Weeks
-          <input
-            type="number"
-            name="severance_weeks"
-            value={formData.severance_weeks}
-            onChange={handleChange}
-            required
-          />
-        </label>
-
-        <label>
-          Job Search Weeks
-          <input
-            type="number"
-            name="job_search_weeks"
-            value={formData.job_search_weeks}
-            onChange={handleChange}
-            required
-          />
-        </label>
-
-        <label style={{ display: "flex", gap: "0.5rem", alignItems: "center" }}>
-          <input
-            type="checkbox"
-            name="is_anonymous"
-            checked={formData.is_anonymous}
-            onChange={handleChange}
-          />
-          Submit anonymously
-        </label>
-
-        <label>
-          Summary
-          <textarea
-            name="summary"
-            value={formData.summary}
-            onChange={handleChange}
-            rows="5"
-            required
-          />
-        </label>
-
-        <button type="submit">Submit Entry</button>
-      </form>
+      {step === 4 && (
+        <Step4Review
+          formData={formData}
+          selectedCompany={selectedCompany}
+          prevStep={prevStep}
+          handleSubmit={handleSubmit}
+          currentStep={step}
+          totalSteps={4}
+        />
+      )}
     </div>
   );
 }
