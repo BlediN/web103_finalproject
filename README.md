@@ -34,7 +34,7 @@ Tech layoffs have been relentless since 2022 and show no signs of slowing down. 
 
 View all community-submitted layoff stories on the main feed. Each entry shows the company, role, severance received, and a short summary of the experience.
 
-[gif goes here]
+![feed] ![alt text](feed_page.gif)
 
 ### Submit Your Story
 
