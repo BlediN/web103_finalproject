@@ -30,17 +30,19 @@ Tech layoffs have been relentless since 2022 and show no signs of slowing down. 
 
 ## Features
 
-### Browse Layoff Stories
+### ✅ Browse Layoff Stories 
 
 View all community-submitted layoff stories on the main feed. Each entry shows the company, role, severance received, and a short summary of the experience.
 
-[gif goes here]
+<img width="690" height="449" alt="feed_page" src="https://github.com/user-attachments/assets/47cea4f5-6092-4b28-a4b7-ff12386e8243" />
 
-### Submit Your Story
+
+### ✅ Submit Your Story 
 
 Sign in with an account and post your own layoff experience. The form validates your entry before saving — no negative severance, no future dates, and all required fields must be filled in.
 
-[gif goes here]
+<img width="690" height="449" alt="mult-submit" src="https://github.com/user-attachments/assets/acce5945-dd59-4bfb-829c-48b98b381eed" />
+
 
 ### Sign in to post a story (Authentication)
 
