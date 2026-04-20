@@ -41,7 +41,8 @@ View all community-submitted layoff stories on the main feed. Each entry shows t
 
 Sign in with an account and post your own layoff experience. The form validates your entry before saving — no negative severance, no future dates, and all required fields must be filled in.
 
-[gif goes here]
+<img width="690" height="449" alt="mult-submit" src="https://github.com/user-attachments/assets/acce5945-dd59-4bfb-829c-48b98b381eed" />
+
 
 ### Sign in to post a story (Authentication)
 
