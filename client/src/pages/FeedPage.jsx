@@ -1,13 +1,24 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import EntryModal from "../components/EntryModal";
+import FeedControls from "../components/FeedControls";
+import useFeedFilters from "../hooks/useFeedFilters";
 
 export default function FeedPage() {
   const [entries, setEntries] = useState([]);
   const [selectedEntry, setSelectedEntry] = useState(null);
-  const [companyFilter, setCompanyFilter] = useState("");
-  const [jobTypeFilter, setJobTypeFilter] = useState("");
-  const [sortOrder, setSortOrder] = useState("newest");
+
+  const {
+    companyFilter,
+    setCompanyFilter,
+    jobTypeFilter,
+    setJobTypeFilter,
+    sortOrder,
+    setSortOrder,
+    handleResetFilters,
+    uniqueCompanies,
+    filteredAndSortedEntries,
+  } = useFeedFilters(entries);
 
   useEffect(() => {
     const fetchEntries = async () => {
@@ -22,79 +33,26 @@ export default function FeedPage() {
     fetchEntries();
   }, []);
 
-  const uniqueCompanies = [...new Set(entries.map((entry) => entry.company_name))];
-
-  const filteredAndSortedEntries = [...entries]
-    .filter((entry) => {
-      const matchesCompany =
-        companyFilter === "" || entry.company_name === companyFilter;
-
-      const matchesJobType =
-        jobTypeFilter === "" || entry.job_type === jobTypeFilter;
-
-      return matchesCompany && matchesJobType;
-    })
-    .sort((a, b) => {
-      const dateA = new Date(a.layoff_date);
-      const dateB = new Date(b.layoff_date);
-
-      if (sortOrder === "newest") {
-        return dateB - dateA;
-      } else {
-        return dateA - dateB;
-      }
-    });
-
   return (
     <div style={{ marginTop: "2rem" }}>
       <h1>Feed Page</h1>
 
-      <div
-        style={{
-          display: "flex",
-          gap: "1rem",
-          flexWrap: "wrap",
-          marginBottom: "1.5rem",
-          alignItems: "center",
-        }}
-      >
-        <select
-          value={companyFilter}
-          onChange={(e) => setCompanyFilter(e.target.value)}
-          style={{ padding: "0.5rem", borderRadius: "6px" }}
-        >
-          <option value="">All Companies</option>
-          {uniqueCompanies.map((company) => (
-            <option key={company} value={company}>
-              {company}
-            </option>
-          ))}
-        </select>
-
-        <select
-          value={jobTypeFilter}
-          onChange={(e) => setJobTypeFilter(e.target.value)}
-          style={{ padding: "0.5rem", borderRadius: "6px" }}
-        >
-          <option value="">All Job Types</option>
-          <option value="Full-time">Full-time</option>
-          <option value="Contract">Contract</option>
-          <option value="Part-time">Part-time</option>
-          <option value="Internship">Internship</option>
-        </select>
-
-        <select
-          value={sortOrder}
-          onChange={(e) => setSortOrder(e.target.value)}
-          style={{ padding: "0.5rem", borderRadius: "6px" }}
-        >
-          <option value="newest">Newest First</option>
-          <option value="oldest">Oldest First</option>
-        </select>
-      </div>
+      <FeedControls
+        companyFilter={companyFilter}
+        setCompanyFilter={setCompanyFilter}
+        jobTypeFilter={jobTypeFilter}
+        setJobTypeFilter={setJobTypeFilter}
+        sortOrder={sortOrder}
+        setSortOrder={setSortOrder}
+        uniqueCompanies={uniqueCompanies}
+        onReset={handleResetFilters}
+      />
 
       {filteredAndSortedEntries.length === 0 ? (
-        <p>No matching entries found.</p>
+        <p>
+          No results match your filters. Try adjusting your filters or resetting
+          them.
+        </p>
       ) : (
         filteredAndSortedEntries.map((entry) => (
           <div
@@ -121,15 +79,18 @@ export default function FeedPage() {
               {entry.role} @ {entry.company_name}
             </h3>
 
-            <p>{entry.summary}</p>
+            <p>{entry.summary || "No summary provided."}</p>
 
             <small>
-              {entry.location} • {entry.job_type} • Laid off:{" "}
-              {new Date(entry.layoff_date).toLocaleDateString("en-US", {
-                year: "numeric",
-                month: "short",
-                day: "numeric",
-              })}
+              {entry.location || "Unknown location"} •{" "}
+              {entry.job_type || "Unknown job type"} • Laid off:{" "}
+              {entry.layoff_date
+                ? new Date(entry.layoff_date).toLocaleDateString("en-US", {
+                    year: "numeric",
+                    month: "short",
+                    day: "numeric",
+                  })
+                : "Unknown date"}
             </small>
 
             <p
