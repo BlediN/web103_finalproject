@@ -1,13 +1,26 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import EntryModal from "../components/EntryModal";
+import FeedControls from "../components/FeedControls";
+import useFeedFilters from "../hooks/useFeedFilters";
 
 export default function FeedPage() {
   const [entries, setEntries] = useState([]);
   const [selectedEntry, setSelectedEntry] = useState(null);
-  const [companyFilter, setCompanyFilter] = useState("");
-  const [jobTypeFilter, setJobTypeFilter] = useState("");
-  const [sortOrder, setSortOrder] = useState("newest");
+
+  const {
+    companyFilter,
+    setCompanyFilter,
+    jobTypeFilter,
+    setJobTypeFilter,
+    sortOrder,
+    setSortOrder,
+    searchTerm,
+    setSearchTerm,
+    handleResetFilters,
+    uniqueCompanies,
+    filteredAndSortedEntries,
+  } = useFeedFilters(entries);
 
   useEffect(() => {
     const fetchEntries = async () => {
@@ -22,134 +35,188 @@ export default function FeedPage() {
     fetchEntries();
   }, []);
 
-  const uniqueCompanies = [...new Set(entries.map((entry) => entry.company_name))];
-
-  const filteredAndSortedEntries = [...entries]
-    .filter((entry) => {
-      const matchesCompany =
-        companyFilter === "" || entry.company_name === companyFilter;
-
-      const matchesJobType =
-        jobTypeFilter === "" || entry.job_type === jobTypeFilter;
-
-      return matchesCompany && matchesJobType;
-    })
-    .sort((a, b) => {
-      const dateA = new Date(a.layoff_date);
-      const dateB = new Date(b.layoff_date);
-
-      if (sortOrder === "newest") {
-        return dateB - dateA;
-      } else {
-        return dateA - dateB;
-      }
-    });
-
   return (
-    <div style={{ marginTop: "2rem" }}>
-      <h1>Feed Page</h1>
-
+    <div
+      style={{
+        minHeight: "100vh",
+        backgroundColor: "#f8fafc",
+        padding: "2rem 1rem",
+      }}
+    >
       <div
         style={{
-          display: "flex",
-          gap: "1rem",
-          flexWrap: "wrap",
-          marginBottom: "1.5rem",
-          alignItems: "center",
+          maxWidth: "920px",
+          margin: "0 auto",
         }}
       >
-        <select
-          value={companyFilter}
-          onChange={(e) => setCompanyFilter(e.target.value)}
-          style={{ padding: "0.5rem", borderRadius: "6px" }}
+        <h1
+          style={{
+            fontSize: "2.5rem",
+            fontWeight: 700,
+            color: "#0f172a",
+            marginBottom: "0.35rem",
+          }}
         >
-          <option value="">All Companies</option>
-          {uniqueCompanies.map((company) => (
-            <option key={company} value={company}>
-              {company}
-            </option>
-          ))}
-        </select>
+          Browse Layoff Stories
+        </h1>
 
-        <select
-          value={jobTypeFilter}
-          onChange={(e) => setJobTypeFilter(e.target.value)}
-          style={{ padding: "0.5rem", borderRadius: "6px" }}
+        <p
+          style={{
+            color: "#64748b",
+            fontSize: "1rem",
+            marginBottom: "1.5rem",
+          }}
         >
-          <option value="">All Job Types</option>
-          <option value="Full-time">Full-time</option>
-          <option value="Contract">Contract</option>
-          <option value="Part-time">Part-time</option>
-          <option value="Internship">Internship</option>
-        </select>
+          Real experiences shared by professionals across companies.
+        </p>
 
-        <select
-          value={sortOrder}
-          onChange={(e) => setSortOrder(e.target.value)}
-          style={{ padding: "0.5rem", borderRadius: "6px" }}
-        >
-          <option value="newest">Newest First</option>
-          <option value="oldest">Oldest First</option>
-        </select>
-      </div>
+        <FeedControls
+          companyFilter={companyFilter}
+          setCompanyFilter={setCompanyFilter}
+          jobTypeFilter={jobTypeFilter}
+          setJobTypeFilter={setJobTypeFilter}
+          sortOrder={sortOrder}
+          setSortOrder={setSortOrder}
+          searchTerm={searchTerm}
+          setSearchTerm={setSearchTerm}
+          uniqueCompanies={uniqueCompanies}
+          onReset={handleResetFilters}
+        />
 
-      {filteredAndSortedEntries.length === 0 ? (
-        <p>No matching entries found.</p>
-      ) : (
-        filteredAndSortedEntries.map((entry) => (
+        {filteredAndSortedEntries.length === 0 ? (
           <div
-            key={entry.id}
-            onClick={() => setSelectedEntry(entry)}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.transform = "translateY(-2px)";
-              e.currentTarget.style.boxShadow = "0 6px 12px rgba(0,0,0,0.1)";
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.transform = "none";
-              e.currentTarget.style.boxShadow = "none";
-            }}
             style={{
-              border: "1px solid #ddd",
-              borderRadius: "8px",
-              padding: "1rem",
-              marginBottom: "1rem",
-              cursor: "pointer",
-              transition: "transform 0.15s ease, box-shadow 0.15s ease",
+              textAlign: "center",
+              padding: "2rem",
+              borderRadius: "16px",
+              backgroundColor: "#ffffff",
+              border: "1px solid #e5e7eb",
+              boxShadow: "0 6px 18px rgba(15, 23, 42, 0.04)",
             }}
           >
-            <h3>
-              {entry.role} @ {entry.company_name}
-            </h3>
-
-            <p>{entry.summary}</p>
-
-            <small>
-              {entry.location} • {entry.job_type} • Laid off:{" "}
-              {new Date(entry.layoff_date).toLocaleDateString("en-US", {
-                year: "numeric",
-                month: "short",
-                day: "numeric",
-              })}
-            </small>
-
             <p
               style={{
-                marginTop: "0.75rem",
-                color: "#2563eb",
-                fontSize: "0.9rem",
-                fontWeight: 500,
+                marginBottom: "0.9rem",
+                color: "#334155",
+                fontSize: "1rem",
               }}
             >
-              Click to view full details
+              No results match your filters.
             </p>
-          </div>
-        ))
-      )}
 
-      <EntryModal
-        entry={selectedEntry}
-        onClose={() => setSelectedEntry(null)}
-      />
+            <button
+              onClick={handleResetFilters}
+              style={{
+                padding: "0.65rem 1rem",
+                borderRadius: "8px",
+                border: "none",
+                backgroundColor: "#2563eb",
+                color: "#ffffff",
+                fontWeight: 500,
+                cursor: "pointer",
+              }}
+            >
+              Reset Filters
+            </button>
+          </div>
+        ) : (
+          filteredAndSortedEntries.map((entry) => (
+            <div
+              key={entry.id}
+              onClick={() => setSelectedEntry(entry)}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.transform = "translateY(-3px)";
+                e.currentTarget.style.boxShadow =
+                  "0 10px 24px rgba(15, 23, 42, 0.08)";
+                e.currentTarget.style.borderColor = "#cbd5e1";
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.transform = "none";
+                e.currentTarget.style.boxShadow =
+                  "0 6px 18px rgba(15, 23, 42, 0.04)";
+                e.currentTarget.style.borderColor = "#e5e7eb";
+              }}
+              style={{
+                border: "1px solid #e5e7eb",
+                borderRadius: "16px",
+                padding: "1.5rem",
+                marginBottom: "1rem",
+                backgroundColor: "#ffffff",
+                boxShadow: "0 6px 18px rgba(15, 23, 42, 0.04)",
+                cursor: "pointer",
+                transition: "all 0.18s ease",
+              }}
+            >
+              <h3
+                style={{
+                  marginBottom: "0.5rem",
+                  fontSize: "1.5rem",
+                  fontWeight: 700,
+                  color: "#475569",
+                  textAlign: "left",
+                }}
+              >
+                {entry.role}{" "}
+                <span style={{ color: "#2563eb", fontWeight: 700 }}>
+                  @ {entry.company_name}
+                </span>
+              </h3>
+
+              <p
+                style={{
+                  color: "#475569",
+                  marginBottom: "0.9rem",
+                  fontSize: "1.05rem",
+                  lineHeight: 1.5,
+                  textAlign: "left",
+                }}
+              >
+                {entry.summary || "No summary provided."}
+              </p>
+
+              <p
+                style={{
+                  color: "#64748b",
+                  fontSize: "0.95rem",
+                  marginBottom: "1rem",
+                  textAlign: "left",
+                }}
+              >
+                {entry.location || "Unknown location"} •{" "}
+                {entry.job_type || "Unknown job type"} •{" "}
+                {entry.layoff_date
+                  ? new Date(entry.layoff_date).toLocaleDateString("en-US", {
+                      year: "numeric",
+                      month: "short",
+                      day: "numeric",
+                    })
+                  : "Unknown date"}
+              </p>
+
+              <div style={{ textAlign: "left" }}>
+                <span
+                  style={{
+                    display: "inline-block",
+                    padding: "0.55rem 0.9rem",
+                    backgroundColor: "#eff6ff",
+                    color: "#2563eb",
+                    borderRadius: "999px",
+                    fontSize: "0.9rem",
+                    fontWeight: 600,
+                  }}
+                >
+                  View Details →
+                </span>
+              </div>
+            </div>
+          ))
+        )}
+
+        <EntryModal
+          entry={selectedEntry}
+          onClose={() => setSelectedEntry(null)}
+        />
+      </div>
     </div>
   );
 }
