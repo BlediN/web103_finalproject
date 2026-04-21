@@ -1,8 +1,10 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
+import EntryModal from "../components/EntryModal";
 
 export default function FeedPage() {
   const [entries, setEntries] = useState([]);
+  const [selectedEntry, setSelectedEntry] = useState(null);
 
   useEffect(() => {
     const fetchEntries = async () => {
@@ -27,11 +29,13 @@ export default function FeedPage() {
         entries.map((entry) => (
           <div
             key={entry.id}
+            onClick={() => setSelectedEntry(entry)}
             style={{
               border: "1px solid #ddd",
               borderRadius: "8px",
               padding: "1rem",
               marginBottom: "1rem",
+              cursor: "pointer",
             }}
           >
             <h3>
@@ -49,6 +53,11 @@ export default function FeedPage() {
           </div>
         ))
       )}
+
+      <EntryModal
+        entry={selectedEntry}
+        onClose={() => setSelectedEntry(null)}
+      />
     </div>
   );
 }
