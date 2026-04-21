@@ -4,11 +4,13 @@ export default function useFeedFilters(entries) {
   const [companyFilter, setCompanyFilter] = useState("");
   const [jobTypeFilter, setJobTypeFilter] = useState("");
   const [sortOrder, setSortOrder] = useState("newest");
+  const [searchTerm, setSearchTerm] = useState("");
 
   const handleResetFilters = () => {
     setCompanyFilter("");
     setJobTypeFilter("");
     setSortOrder("newest");
+    setSearchTerm("");
   };
 
   const uniqueCompanies = useMemo(() => {
@@ -24,7 +26,15 @@ export default function useFeedFilters(entries) {
         const matchesJobType =
           jobTypeFilter === "" || entry.job_type === jobTypeFilter;
 
-        return matchesCompany && matchesJobType;
+        const normalizedSearch = searchTerm.toLowerCase();
+
+        const matchesSearch =
+          searchTerm === "" ||
+          entry.company_name?.toLowerCase().includes(normalizedSearch) ||
+          entry.role?.toLowerCase().includes(normalizedSearch) ||
+          entry.summary?.toLowerCase().includes(normalizedSearch);
+
+        return matchesCompany && matchesJobType && matchesSearch;
       })
       .sort((a, b) => {
         const dateA = new Date(a.layoff_date);
@@ -32,7 +42,7 @@ export default function useFeedFilters(entries) {
 
         return sortOrder === "newest" ? dateB - dateA : dateA - dateB;
       });
-  }, [entries, companyFilter, jobTypeFilter, sortOrder]);
+  }, [entries, companyFilter, jobTypeFilter, sortOrder, searchTerm]);
 
   return {
     companyFilter,
@@ -41,6 +51,8 @@ export default function useFeedFilters(entries) {
     setJobTypeFilter,
     sortOrder,
     setSortOrder,
+    searchTerm,
+    setSearchTerm,
     handleResetFilters,
     uniqueCompanies,
     filteredAndSortedEntries,

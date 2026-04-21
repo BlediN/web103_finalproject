@@ -15,6 +15,8 @@ export default function FeedPage() {
     setJobTypeFilter,
     sortOrder,
     setSortOrder,
+    searchTerm,
+    setSearchTerm,
     handleResetFilters,
     uniqueCompanies,
     filteredAndSortedEntries,
@@ -75,6 +77,8 @@ export default function FeedPage() {
           setJobTypeFilter={setJobTypeFilter}
           sortOrder={sortOrder}
           setSortOrder={setSortOrder}
+          searchTerm={searchTerm}
+          setSearchTerm={setSearchTerm}
           uniqueCompanies={uniqueCompanies}
           onReset={handleResetFilters}
         />
@@ -124,11 +128,13 @@ export default function FeedPage() {
                 e.currentTarget.style.transform = "translateY(-3px)";
                 e.currentTarget.style.boxShadow =
                   "0 10px 24px rgba(15, 23, 42, 0.08)";
+                e.currentTarget.style.borderColor = "#cbd5e1";
               }}
               onMouseLeave={(e) => {
                 e.currentTarget.style.transform = "none";
                 e.currentTarget.style.boxShadow =
                   "0 6px 18px rgba(15, 23, 42, 0.04)";
+                e.currentTarget.style.borderColor = "#e5e7eb";
               }}
               style={{
                 border: "1px solid #e5e7eb",
@@ -143,14 +149,17 @@ export default function FeedPage() {
             >
               <h3
                 style={{
-                  marginBottom: "0.4rem",
-                  fontSize: "1.75rem",
-                  fontWeight: 600,
-                  color: "#6b7280",
-                  textAlign: "center",
+                  marginBottom: "0.5rem",
+                  fontSize: "1.5rem",
+                  fontWeight: 700,
+                  color: "#475569",
+                  textAlign: "left",
                 }}
               >
-                {entry.role} @ {entry.company_name}
+                {entry.role}{" "}
+                <span style={{ color: "#2563eb", fontWeight: 700 }}>
+                  @ {entry.company_name}
+                </span>
               </h3>
 
               <p
@@ -158,7 +167,8 @@ export default function FeedPage() {
                   color: "#475569",
                   marginBottom: "0.9rem",
                   fontSize: "1.05rem",
-                  textAlign: "center",
+                  lineHeight: 1.5,
+                  textAlign: "left",
                 }}
               >
                 {entry.summary || "No summary provided."}
@@ -167,9 +177,9 @@ export default function FeedPage() {
               <p
                 style={{
                   color: "#64748b",
-                  fontSize: "0.98rem",
-                  marginBottom: "0.9rem",
-                  textAlign: "center",
+                  fontSize: "0.95rem",
+                  marginBottom: "1rem",
+                  textAlign: "left",
                 }}
               >
                 {entry.location || "Unknown location"} •{" "}
@@ -183,17 +193,21 @@ export default function FeedPage() {
                   : "Unknown date"}
               </p>
 
-              <p
-                style={{
-                  marginTop: "0.5rem",
-                  color: "#2563eb",
-                  fontSize: "0.95rem",
-                  fontWeight: 600,
-                  textAlign: "center",
-                }}
-              >
-                View Details →
-              </p>
+              <div style={{ textAlign: "left" }}>
+                <span
+                  style={{
+                    display: "inline-block",
+                    padding: "0.55rem 0.9rem",
+                    backgroundColor: "#eff6ff",
+                    color: "#2563eb",
+                    borderRadius: "999px",
+                    fontSize: "0.9rem",
+                    fontWeight: 600,
+                  }}
+                >
+                  View Details →
+                </span>
+              </div>
             </div>
           ))
         )}
