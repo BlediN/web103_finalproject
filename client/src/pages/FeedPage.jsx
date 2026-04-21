@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import axios from "axios";
 import EntryModal from "../components/EntryModal";
 import FeedControls from "../components/FeedControls";
@@ -157,9 +158,17 @@ export default function FeedPage() {
                 }}
               >
                 {entry.role}{" "}
-                <span style={{ color: "#2563eb", fontWeight: 700 }}>
+                <Link
+                  to={`/company/${encodeURIComponent(entry.company_name)}`}
+                  onClick={(e) => e.stopPropagation()}
+                  style={{
+                    color: "#2563eb",
+                    fontWeight: 700,
+                    textDecoration: "none",
+                  }}
+                >
                   @ {entry.company_name}
-                </span>
+                </Link>
               </h3>
 
               <p

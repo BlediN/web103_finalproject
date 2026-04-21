@@ -1,3 +1,5 @@
+import { useNavigate } from "react-router-dom";
+
 export default function FeedControls({
   companyFilter,
   setCompanyFilter,
@@ -10,6 +12,8 @@ export default function FeedControls({
   uniqueCompanies,
   onReset,
 }) {
+  const navigate = useNavigate();
+
   const isDefault =
     companyFilter === "" &&
     jobTypeFilter === "" &&
@@ -56,7 +60,14 @@ export default function FeedControls({
       >
         <select
           value={companyFilter}
-          onChange={(e) => setCompanyFilter(e.target.value)}
+          onChange={(e) => {
+            const selectedCompany = e.target.value;
+            setCompanyFilter(selectedCompany);
+
+            if (selectedCompany) {
+              navigate(`/company/${encodeURIComponent(selectedCompany)}`);
+            }
+          }}
           style={{
             padding: "0.75rem 0.9rem",
             borderRadius: "10px",
