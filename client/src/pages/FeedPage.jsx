@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import axios from "axios";
 import EntryModal from "../components/EntryModal";
 import FeedControls from "../components/FeedControls";
@@ -8,6 +8,10 @@ import useFeedFilters from "../hooks/useFeedFilters";
 export default function FeedPage() {
   const [entries, setEntries] = useState([]);
   const [selectedEntry, setSelectedEntry] = useState(null);
+
+  const location = useLocation();
+  const navigate = useNavigate();
+  const successMessage = location.state?.success;
 
   const {
     companyFilter,
@@ -36,6 +40,16 @@ export default function FeedPage() {
     fetchEntries();
   }, []);
 
+  useEffect(() => {
+    if (successMessage) {
+      const timer = setTimeout(() => {
+        navigate(location.pathname, { replace: true, state: {} });
+      }, 3000);
+
+      return () => clearTimeout(timer);
+    }
+  }, [successMessage, navigate, location.pathname]);
+
   return (
     <div
       style={{
@@ -50,6 +64,23 @@ export default function FeedPage() {
           margin: "0 auto",
         }}
       >
+        {successMessage && (
+          <div
+            style={{
+              backgroundColor: "#dcfce7",
+              color: "#166534",
+              border: "1px solid #bbf7d0",
+              padding: "0.9rem 1rem",
+              borderRadius: "12px",
+              marginBottom: "1rem",
+              fontWeight: 600,
+              boxShadow: "0 4px 12px rgba(22, 101, 52, 0.08)",
+            }}
+          >
+            {successMessage}
+          </div>
+        )}
+
         <h1
           style={{
             fontSize: "2.5rem",
@@ -157,7 +188,7 @@ export default function FeedPage() {
                   textAlign: "left",
                 }}
               >
-                {entry.role}{" "}
+                {entry.role || "Unknown role"}{" "}
                 <Link
                   to={`/company/${encodeURIComponent(entry.company_name)}`}
                   onClick={(e) => e.stopPropagation()}
@@ -187,7 +218,7 @@ export default function FeedPage() {
                 style={{
                   color: "#64748b",
                   fontSize: "0.95rem",
-                  marginBottom: "1rem",
+                  marginBottom: "0.75rem",
                   textAlign: "left",
                 }}
               >
@@ -200,6 +231,31 @@ export default function FeedPage() {
                       day: "numeric",
                     })
                   : "Unknown date"}
+              </p>
+
+              <p
+                style={{
+                  color: "#94a3b8",
+                  fontSize: "0.9rem",
+                  marginBottom: "1rem",
+                  textAlign: "left",
+                }}
+              >
+                Severance:{" "}
+                {entry.severance_weeks !== null &&
+                entry.severance_weeks !== undefined
+                  ? `${entry.severance_weeks} week${
+                      entry.severance_weeks === 1 ? "" : "s"
+                    }`
+                  : "N/A"}{" "}
+                • Job search:{" "}
+                {entry.job_search_weeks !== null &&
+                entry.job_search_weeks !== undefined
+                  ? `${entry.job_search_weeks} week${
+                      entry.job_search_weeks === 1 ? "" : "s"
+                    }`
+                  : "N/A"}{" "}
+                • {entry.is_anonymous ? "Anonymous" : "Named"}
               </p>
 
               <div style={{ textAlign: "left" }}>
