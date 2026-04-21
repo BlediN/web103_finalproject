@@ -9,6 +9,16 @@ export default function EntryModal({ entry, onClose }) {
       })
     : "N/A";
 
+  const labelStyle = {
+    color: "#6b7280",
+    fontWeight: 600,
+  };
+
+  const valueStyle = {
+    color: "#111827",
+    fontWeight: 500,
+  };
+
   return (
     <div
       onClick={onClose}
@@ -28,7 +38,7 @@ export default function EntryModal({ entry, onClose }) {
         style={{
           backgroundColor: "white",
           borderRadius: "12px",
-          padding: "1.5rem",
+          padding: "1.75rem",
           maxWidth: "620px",
           width: "100%",
           maxHeight: "80vh",
@@ -41,15 +51,15 @@ export default function EntryModal({ entry, onClose }) {
             display: "flex",
             justifyContent: "space-between",
             alignItems: "flex-start",
-            marginBottom: "1rem",
+            marginBottom: "1.25rem",
             gap: "1rem",
           }}
         >
           <div>
-            <h2 style={{ margin: 0 }}>
+            <h2 style={{ margin: 0, color: "#111827" }}>
               {entry.role} @ {entry.company_name}
             </h2>
-            <p style={{ marginTop: "0.5rem", color: "#666" }}>
+            <p style={{ marginTop: "0.45rem", color: "#6b7280" }}>
               Full story details
             </p>
           </div>
@@ -57,12 +67,13 @@ export default function EntryModal({ entry, onClose }) {
           <button
             onClick={onClose}
             style={{
-              border: "none",
-              backgroundColor: "#2563eb",
-              color: "white",
+              border: "1px solid #d1d5db",
+              backgroundColor: "#f3f4f6",
+              color: "#374151",
               borderRadius: "8px",
-              padding: "0.5rem 0.75rem",
+              padding: "0.45rem 0.75rem",
               cursor: "pointer",
+              fontWeight: 600,
             }}
           >
             X
@@ -73,29 +84,44 @@ export default function EntryModal({ entry, onClose }) {
           style={{
             display: "flex",
             flexDirection: "column",
-            gap: "0.85rem",
-            lineHeight: 1.5,
+            gap: "0.95rem",
+            lineHeight: 1.6,
+            alignItems: "flex-start",
+            textAlign: "left",
           }}
         >
-          <p>
-            <strong>Location:</strong> {entry.location || "N/A"}
+          <p style={{ margin: 0 }}>
+            <span style={labelStyle}>Location:</span>{" "}
+            <span style={valueStyle}>{entry.location || "N/A"}</span>
           </p>
-          <p>
-            <strong>Job Type:</strong> {entry.job_type || "N/A"}
+
+          <p style={{ margin: 0 }}>
+            <span style={labelStyle}>Job Type:</span>{" "}
+            <span style={valueStyle}>{entry.job_type || "N/A"}</span>
           </p>
-          <p>
-            <strong>Layoff Date:</strong> {formattedDate}
+
+          <p style={{ margin: 0 }}>
+            <span style={labelStyle}>Layoff Date:</span>{" "}
+            <span style={valueStyle}>{formattedDate}</span>
           </p>
-          <p>
-            <strong>Severance Weeks:</strong>{" "}
-            {entry.severance_weeks ?? "N/A"}
+
+          <p style={{ margin: 0 }}>
+            <span style={labelStyle}>Severance Weeks:</span>{" "}
+            <span style={valueStyle}>
+              {entry.severance_weeks ?? "N/A"}
+            </span>
           </p>
-          <p>
-            <strong>Job Search Weeks:</strong>{" "}
-            {entry.job_search_weeks ?? "N/A"}
+
+          <p style={{ margin: 0 }}>
+            <span style={labelStyle}>Job Search Weeks:</span>{" "}
+            <span style={valueStyle}>
+              {entry.job_search_weeks ?? "N/A"}
+            </span>
           </p>
-          <p>
-            <strong>Anonymous:</strong> {entry.is_anonymous ? "Yes" : "No"}
+
+          <p style={{ margin: 0 }}>
+            <span style={labelStyle}>Anonymous:</span>{" "}
+            <span style={valueStyle}>{entry.is_anonymous ? "Yes" : "No"}</span>
           </p>
 
           <div
@@ -105,12 +131,29 @@ export default function EntryModal({ entry, onClose }) {
               border: "1px solid #e5e7eb",
               borderRadius: "10px",
               backgroundColor: "#f9fafb",
+              width: "100%",
+              boxSizing: "border-box",
             }}
           >
-            <p style={{ marginTop: 0, marginBottom: "0.5rem" }}>
-              <strong>Summary</strong>
+            <p
+              style={{
+                marginTop: 0,
+                marginBottom: "0.5rem",
+                color: "#6b7280",
+                fontWeight: 600,
+              }}
+            >
+              Summary
             </p>
-            <p style={{ margin: 0 }}>{entry.summary || "No summary provided."}</p>
+            <p
+              style={{
+                margin: 0,
+                color: "#111827",
+                lineHeight: 1.6,
+              }}
+            >
+              {entry.summary || "No summary provided."}
+            </p>
           </div>
         </div>
       </div>
