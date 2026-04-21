@@ -8,20 +8,37 @@ export default function FeedControls({
   uniqueCompanies,
   onReset,
 }) {
+  const isDefault =
+    companyFilter === "" &&
+    jobTypeFilter === "" &&
+    sortOrder === "newest";
+
   return (
     <div
       style={{
         display: "flex",
         gap: "1rem",
         flexWrap: "wrap",
-        marginBottom: "1.5rem",
         alignItems: "center",
+        padding: "1rem",
+        borderRadius: "14px",
+        backgroundColor: "#ffffff",
+        border: "1px solid #e5e7eb",
+        boxShadow: "0 4px 14px rgba(15, 23, 42, 0.05)",
+        marginBottom: "1.5rem",
       }}
     >
       <select
         value={companyFilter}
         onChange={(e) => setCompanyFilter(e.target.value)}
-        style={{ padding: "0.5rem", borderRadius: "6px" }}
+        style={{
+          padding: "0.75rem 0.9rem",
+          borderRadius: "10px",
+          border: "1px solid #cbd5e1",
+          backgroundColor: "#ffffff",
+          color: "#0f172a",
+          fontSize: "0.95rem",
+        }}
       >
         <option value="">All Companies</option>
         {uniqueCompanies.map((company) => (
@@ -34,7 +51,14 @@ export default function FeedControls({
       <select
         value={jobTypeFilter}
         onChange={(e) => setJobTypeFilter(e.target.value)}
-        style={{ padding: "0.5rem", borderRadius: "6px" }}
+        style={{
+          padding: "0.75rem 0.9rem",
+          borderRadius: "10px",
+          border: "1px solid #cbd5e1",
+          backgroundColor: "#ffffff",
+          color: "#0f172a",
+          fontSize: "0.95rem",
+        }}
       >
         <option value="">All Job Types</option>
         <option value="Full-time">Full-time</option>
@@ -46,33 +70,36 @@ export default function FeedControls({
       <select
         value={sortOrder}
         onChange={(e) => setSortOrder(e.target.value)}
-        style={{ padding: "0.5rem", borderRadius: "6px" }}
+        style={{
+          padding: "0.75rem 0.9rem",
+          borderRadius: "10px",
+          border: "1px solid #cbd5e1",
+          backgroundColor: "#ffffff",
+          color: "#0f172a",
+          fontSize: "0.95rem",
+        }}
       >
         <option value="newest">Newest First</option>
         <option value="oldest">Oldest First</option>
       </select>
 
       <button
-  onClick={onReset}
-  style={{
-    padding: "0.5rem 0.75rem",
-    borderRadius: "6px",
-    border: "none",
-    backgroundColor: "#2563eb",
-    color: "white",
-    fontWeight: 500,
-    cursor: "pointer",
-    transition: "background-color 0.2s ease",
-  }}
-  onMouseEnter={(e) => {
-    e.target.style.backgroundColor = "#1d4ed8";
-  }}
-  onMouseLeave={(e) => {
-    e.target.style.backgroundColor = "#2563eb";
-  }}
->
-  Reset Filters
-</button>
+        onClick={onReset}
+        disabled={isDefault}
+        style={{
+          padding: "0.75rem 1rem",
+          borderRadius: "10px",
+          border: "none",
+          backgroundColor: isDefault ? "#94a3b8" : "#2563eb",
+          color: "white",
+          fontWeight: 600,
+          cursor: isDefault ? "not-allowed" : "pointer",
+          opacity: isDefault ? 0.7 : 1,
+          transition: "background-color 0.2s ease",
+        }}
+      >
+        Reset Filters
+      </button>
     </div>
   );
 }
