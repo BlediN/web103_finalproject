@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link, useLocation, useNavigate } from "react-router-dom";
 import axios from "axios";
 import EntryModal from "../components/EntryModal";
 import NotFound from "./NotFound";
@@ -11,6 +11,10 @@ export default function CompanyPage() {
   const [entries, setEntries] = useState([]);
   const [selectedEntry, setSelectedEntry] = useState(null);
   const [loading, setLoading] = useState(true);
+
+  const location = useLocation();
+  const navigate = useNavigate();
+  const successMessage = location.state?.success;
 
   useEffect(() => {
     const fetchEntries = async () => {
@@ -26,6 +30,16 @@ export default function CompanyPage() {
 
     fetchEntries();
   }, []);
+
+  useEffect(() => {
+    if (successMessage) {
+      const timer = setTimeout(() => {
+        navigate(location.pathname, { replace: true, state: {} });
+      }, 3000);
+
+      return () => clearTimeout(timer);
+    }
+  }, [successMessage, navigate, location.pathname]);
 
   const companyExists = entries.some(
     (entry) => entry.company_name === decodedCompany
@@ -53,6 +67,23 @@ export default function CompanyPage() {
           margin: "0 auto",
         }}
       >
+        {successMessage && (
+          <div
+            style={{
+              backgroundColor: "#dcfce7",
+              color: "#166534",
+              border: "1px solid #bbf7d0",
+              padding: "0.9rem 1rem",
+              borderRadius: "12px",
+              marginBottom: "1rem",
+              fontWeight: 600,
+              boxShadow: "0 4px 12px rgba(22, 101, 52, 0.08)",
+            }}
+          >
+            {successMessage}
+          </div>
+        )}
+
         <Link
           to="/"
           style={{

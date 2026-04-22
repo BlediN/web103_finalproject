@@ -101,9 +101,21 @@ export default function SubmitEntryPage() {
         job_search_weeks: Number(formData.job_search_weeks),
       });
 
-      navigate("/", {
-        state: { success: "Your layoff story was submitted successfully." },
-      });
+      const companyName = selectedCompany?.name;
+
+      if (companyName) {
+        navigate(`/company/${encodeURIComponent(companyName)}`, {
+          state: {
+            success: `Your layoff story was submitted successfully for ${companyName}.`,
+          },
+        });
+      } else {
+        navigate("/", {
+          state: {
+            success: "Your layoff story was submitted successfully.",
+          },
+        });
+      }
     } catch (error) {
       console.error("Error submitting entry:", error);
       setErrorMessage("Failed to submit entry. Please try again.");
