@@ -1,13 +1,17 @@
 import { useState, useEffect } from "react";
+import { useLocation } from "react-router-dom";
 import axios from "axios";
 import EntryModal from "../components/EntryModal";
 import FeedControls from "../components/FeedControls";
 import useFeedFilters from "../hooks/useFeedFilters";
 
 export default function FeedPage() {
+  const location = useLocation();
+
   const [entries, setEntries] = useState([]);
   const [selectedEntry, setSelectedEntry] = useState(null);
   const [successMessage, setSuccessMessage] = useState("");
+  const [deleting, setDeleting] = useState(false);
 
   const fetchEntries = async () => {
     try {
@@ -21,6 +25,13 @@ export default function FeedPage() {
   useEffect(() => {
     fetchEntries();
   }, []);
+
+  useEffect(() => {
+    if (location.state?.success) {
+      setSuccessMessage(location.state.success);
+      window.history.replaceState({}, document.title);
+    }
+  }, [location.state]);
 
   const {
     companyFilter,
@@ -37,26 +48,30 @@ export default function FeedPage() {
   } = useFeedFilters(entries);
 
   const handleDelete = async (id) => {
+    const confirmed = window.confirm(
+      "Are you sure you want to delete this story? This cannot be undone."
+    );
+
+    if (!confirmed) return;
+
     try {
+      setDeleting(true);
       await axios.delete(`http://localhost:3001/api/entries/${id}`);
       await fetchEntries();
       setSelectedEntry(null);
       setSuccessMessage("Story deleted successfully.");
     } catch (error) {
       console.error("Error deleting entry:", error);
+    } finally {
+      setDeleting(false);
     }
   };
 
   const handleUpdate = async (id, updatedData) => {
     try {
-      const response = await axios.patch(
-        `http://localhost:3001/api/entries/${id}`,
-        updatedData
-      );
-
+      await axios.patch(`http://localhost:3001/api/entries/${id}`, updatedData);
       await fetchEntries();
-
-      setSelectedEntry(response.data);
+      setSelectedEntry(null);
       setSuccessMessage("Story updated successfully.");
     } catch (error) {
       console.error("Error updating entry:", error);
@@ -138,6 +153,7 @@ export default function FeedPage() {
           onClose={() => setSelectedEntry(null)}
           onDelete={handleDelete}
           onUpdate={handleUpdate}
+          deleting={deleting}
         />
       )}
     </div>
