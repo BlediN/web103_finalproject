@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link, useLocation, useNavigate } from "react-router-dom";
 import axios from "axios";
 import EntryModal from "../components/EntryModal";
 import NotFound from "./NotFound";
@@ -11,21 +11,59 @@ export default function CompanyPage() {
   const [entries, setEntries] = useState([]);
   const [selectedEntry, setSelectedEntry] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [deleting, setDeleting] = useState(false);
+
+  const location = useLocation();
+  const navigate = useNavigate();
+  const successMessage = location.state?.success;
+
+  const fetchEntries = async () => {
+    try {
+      const response = await axios.get("http://localhost:3001/api/entries");
+      setEntries(response.data);
+    } catch (error) {
+      console.error("Error fetching entries:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const fetchEntries = async () => {
-      try {
-        const response = await axios.get("http://localhost:3001/api/entries");
-        setEntries(response.data);
-      } catch (error) {
-        console.error("Error fetching entries:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
     fetchEntries();
   }, []);
+
+  useEffect(() => {
+    if (successMessage) {
+      const timer = setTimeout(() => {
+        navigate(location.pathname, { replace: true, state: {} });
+      }, 3000);
+
+      return () => clearTimeout(timer);
+    }
+  }, [successMessage, navigate, location.pathname]);
+
+  const handleDeleteEntry = async (entryId) => {
+    const confirmed = window.confirm(
+      "Are you sure you want to delete this story? This cannot be undone."
+    );
+
+    if (!confirmed) return;
+
+    try {
+      setDeleting(true);
+      await axios.delete(`http://localhost:3001/api/entries/${entryId}`);
+      setSelectedEntry(null);
+      await fetchEntries();
+      navigate(location.pathname, {
+        replace: true,
+        state: { success: "Story deleted successfully." },
+      });
+    } catch (error) {
+      console.error("Error deleting entry:", error);
+    } finally {
+      setDeleting(false);
+    }
+  };
 
   const companyExists = entries.some(
     (entry) => entry.company_name === decodedCompany
@@ -53,6 +91,23 @@ export default function CompanyPage() {
           margin: "0 auto",
         }}
       >
+        {successMessage && (
+          <div
+            style={{
+              backgroundColor: "#dcfce7",
+              color: "#166534",
+              border: "1px solid #bbf7d0",
+              padding: "0.9rem 1rem",
+              borderRadius: "12px",
+              marginBottom: "1rem",
+              fontWeight: 600,
+              boxShadow: "0 4px 12px rgba(22, 101, 52, 0.08)",
+            }}
+          >
+            {successMessage}
+          </div>
+        )}
+
         <Link
           to="/"
           style={{
@@ -281,6 +336,8 @@ export default function CompanyPage() {
         <EntryModal
           entry={selectedEntry}
           onClose={() => setSelectedEntry(null)}
+          onDelete={handleDeleteEntry}
+          deleting={deleting}
         />
       </div>
     </div>

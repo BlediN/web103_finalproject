@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 
-export default function EntryModal({ entry, onClose }) {
+export default function EntryModal({ entry, onClose, onDelete, deleting = false }) {
   useEffect(() => {
     if (!entry) return;
 
@@ -49,24 +49,18 @@ export default function EntryModal({ entry, onClose }) {
           backgroundColor: "#ffffff",
           borderRadius: "20px",
           width: "100%",
-          maxWidth: "760px",
+          maxWidth: "720px",
           maxHeight: "90vh",
           overflowY: "auto",
           boxShadow: "0 20px 50px rgba(15, 23, 42, 0.25)",
           border: "1px solid #e5e7eb",
-          padding: "2rem",
+          padding: "1.75rem",
           position: "relative",
         }}
       >
         <button
           onClick={onClose}
           aria-label="Close modal"
-          onMouseEnter={(e) => {
-            e.currentTarget.style.backgroundColor = "#e2e8f0";
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.backgroundColor = "#f8fafc";
-          }}
           style={{
             position: "absolute",
             top: "1rem",
@@ -80,7 +74,6 @@ export default function EntryModal({ entry, onClose }) {
             fontSize: "1.2rem",
             fontWeight: 700,
             cursor: "pointer",
-            transition: "background-color 0.15s ease",
           }}
         >
           ×
@@ -90,7 +83,7 @@ export default function EntryModal({ entry, onClose }) {
           <h2
             style={{
               margin: 0,
-              marginBottom: "0.5rem",
+              marginBottom: "0.35rem",
               fontSize: "2rem",
               fontWeight: 800,
               color: "#0f172a",
@@ -123,207 +116,126 @@ export default function EntryModal({ entry, onClose }) {
             marginBottom: "1.5rem",
           }}
         >
-          <div
-            style={{
-              backgroundColor: "#f8fafc",
-              border: "1px solid #e5e7eb",
-              borderRadius: "14px",
-              padding: "1rem",
-            }}
-          >
+          {[
+            ["Location", entry.location || "Unknown"],
+            ["Job Type", entry.job_type || "Unknown"],
+            ["Layoff Date", formattedDate],
+            [
+              "Severance",
+              entry.severance_weeks !== null && entry.severance_weeks !== undefined
+                ? `${entry.severance_weeks} week${entry.severance_weeks === 1 ? "" : "s"}`
+                : "N/A",
+            ],
+            [
+              "Job Search Time",
+              entry.job_search_weeks !== null && entry.job_search_weeks !== undefined
+                ? `${entry.job_search_weeks} week${entry.job_search_weeks === 1 ? "" : "s"}`
+                : "N/A",
+            ],
+            ["Visibility", entry.is_anonymous ? "Anonymous" : "Named"],
+          ].map(([label, value]) => (
             <div
+              key={label}
               style={{
-                fontSize: "0.85rem",
-                fontWeight: 700,
-                color: "#64748b",
-                marginBottom: "0.35rem",
-                textTransform: "uppercase",
-                letterSpacing: "0.03em",
+                backgroundColor: "#f8fafc",
+                border: "1px solid #e5e7eb",
+                borderRadius: "14px",
+                padding: "1rem",
               }}
             >
-              Location
+              <div
+                style={{
+                  fontSize: "0.85rem",
+                  fontWeight: 700,
+                  color: "#64748b",
+                  marginBottom: "0.35rem",
+                  textTransform: "uppercase",
+                  letterSpacing: "0.03em",
+                }}
+              >
+                {label}
+              </div>
+              <div style={{ fontSize: "1rem", color: "#0f172a", fontWeight: 600 }}>
+                {value}
+              </div>
             </div>
-            <div style={{ fontSize: "1rem", color: "#0f172a", fontWeight: 600 }}>
-              {entry.location || "Unknown"}
-            </div>
-          </div>
-
-          <div
-            style={{
-              backgroundColor: "#f8fafc",
-              border: "1px solid #e5e7eb",
-              borderRadius: "14px",
-              padding: "1rem",
-            }}
-          >
-            <div
-              style={{
-                fontSize: "0.85rem",
-                fontWeight: 700,
-                color: "#64748b",
-                marginBottom: "0.35rem",
-                textTransform: "uppercase",
-                letterSpacing: "0.03em",
-              }}
-            >
-              Job Type
-            </div>
-            <div style={{ fontSize: "1rem", color: "#0f172a", fontWeight: 600 }}>
-              {entry.job_type || "Unknown"}
-            </div>
-          </div>
-
-          <div
-            style={{
-              backgroundColor: "#f8fafc",
-              border: "1px solid #e5e7eb",
-              borderRadius: "14px",
-              padding: "1rem",
-            }}
-          >
-            <div
-              style={{
-                fontSize: "0.85rem",
-                fontWeight: 700,
-                color: "#64748b",
-                marginBottom: "0.35rem",
-                textTransform: "uppercase",
-                letterSpacing: "0.03em",
-              }}
-            >
-              Layoff Date
-            </div>
-            <div style={{ fontSize: "1rem", color: "#0f172a", fontWeight: 600 }}>
-              {formattedDate}
-            </div>
-          </div>
-
-          <div
-            style={{
-              backgroundColor: "#f8fafc",
-              border: "1px solid #e5e7eb",
-              borderRadius: "14px",
-              padding: "1rem",
-            }}
-          >
-            <div
-              style={{
-                fontSize: "0.85rem",
-                fontWeight: 700,
-                color: "#64748b",
-                marginBottom: "0.35rem",
-                textTransform: "uppercase",
-                letterSpacing: "0.03em",
-              }}
-            >
-              Severance
-            </div>
-            <div style={{ fontSize: "1rem", color: "#0f172a", fontWeight: 600 }}>
-              {entry.severance_weeks !== null &&
-              entry.severance_weeks !== undefined
-                ? `${entry.severance_weeks} week${
-                    entry.severance_weeks === 1 ? "" : "s"
-                  }`
-                : "N/A"}
-            </div>
-          </div>
-
-          <div
-            style={{
-              backgroundColor: "#f8fafc",
-              border: "1px solid #e5e7eb",
-              borderRadius: "14px",
-              padding: "1rem",
-            }}
-          >
-            <div
-              style={{
-                fontSize: "0.85rem",
-                fontWeight: 700,
-                color: "#64748b",
-                marginBottom: "0.35rem",
-                textTransform: "uppercase",
-                letterSpacing: "0.03em",
-              }}
-            >
-              Job Search Time
-            </div>
-            <div style={{ fontSize: "1rem", color: "#0f172a", fontWeight: 600 }}>
-              {entry.job_search_weeks !== null &&
-              entry.job_search_weeks !== undefined
-                ? `${entry.job_search_weeks} week${
-                    entry.job_search_weeks === 1 ? "" : "s"
-                  }`
-                : "N/A"}
-            </div>
-          </div>
-
-          <div
-            style={{
-              backgroundColor: "#f8fafc",
-              border: "1px solid #e5e7eb",
-              borderRadius: "14px",
-              padding: "1rem",
-            }}
-          >
-            <div
-              style={{
-                fontSize: "0.85rem",
-                fontWeight: 700,
-                color: "#64748b",
-                marginBottom: "0.35rem",
-                textTransform: "uppercase",
-                letterSpacing: "0.03em",
-              }}
-            >
-              Visibility
-            </div>
-            <div style={{ fontSize: "1rem", color: "#0f172a", fontWeight: 600 }}>
-              {entry.is_anonymous ? "Anonymous" : "Named"}
-            </div>
-          </div>
+          ))}
         </div>
 
         <div
           style={{
-            marginTop: "1rem",
-            borderTop: "1px solid #e5e7eb",
-            paddingTop: "1.25rem",
+            backgroundColor: "#f8fafc",
+            border: "1px solid #e5e7eb",
+            borderRadius: "16px",
+            padding: "1.15rem",
+            marginBottom: "1.25rem",
           }}
         >
           <div
             style={{
-              backgroundColor: "#f8fafc",
-              border: "1px solid #e5e7eb",
-              borderRadius: "16px",
-              padding: "1.15rem",
+              fontSize: "1rem",
+              fontWeight: 700,
+              color: "#334155",
+              marginBottom: "0.75rem",
             }}
           >
-            <div
-              style={{
-                fontSize: "1rem",
-                fontWeight: 700,
-                color: "#334155",
-                marginBottom: "0.75rem",
-              }}
-            >
-              Summary
-            </div>
-
-            <p
-              style={{
-                margin: 0,
-                color: "#0f172a",
-                fontSize: "1rem",
-                lineHeight: 1.7,
-                whiteSpace: "pre-wrap",
-                wordBreak: "break-word",
-                textAlign: "left",
-              }}
-            >
-              {entry.summary || "No summary provided."}
-            </p>
+            Summary
           </div>
+
+          <p
+            style={{
+              margin: 0,
+              color: "#0f172a",
+              fontSize: "1rem",
+              lineHeight: 1.7,
+              whiteSpace: "pre-wrap",
+              wordBreak: "break-word",
+            }}
+          >
+            {entry.summary || "No summary provided."}
+          </p>
+        </div>
+
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "flex-end",
+            gap: "0.75rem",
+          }}
+        >
+          <button
+            onClick={onClose}
+            disabled={deleting}
+            style={{
+              padding: "0.75rem 1rem",
+              borderRadius: "10px",
+              border: "1px solid #cbd5e1",
+              backgroundColor: "#ffffff",
+              color: "#334155",
+              fontWeight: 600,
+              cursor: deleting ? "not-allowed" : "pointer",
+              opacity: deleting ? 0.7 : 1,
+            }}
+          >
+            Close
+          </button>
+
+          <button
+            onClick={() => onDelete?.(entry.id)}
+            disabled={deleting}
+            style={{
+              padding: "0.75rem 1rem",
+              borderRadius: "10px",
+              border: "none",
+              backgroundColor: "#dc2626",
+              color: "#ffffff",
+              fontWeight: 700,
+              cursor: deleting ? "not-allowed" : "pointer",
+              opacity: deleting ? 0.7 : 1,
+            }}
+          >
+            {deleting ? "Deleting..." : "Delete Story"}
+          </button>
         </div>
       </div>
     </div>
