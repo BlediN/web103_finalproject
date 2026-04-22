@@ -8,6 +8,7 @@ import useFeedFilters from "../hooks/useFeedFilters";
 export default function FeedPage() {
   const [entries, setEntries] = useState([]);
   const [selectedEntry, setSelectedEntry] = useState(null);
+  const [loading, setLoading] = useState(true);
 
   const location = useLocation();
   const navigate = useNavigate();
@@ -34,6 +35,8 @@ export default function FeedPage() {
         setEntries(response.data);
       } catch (error) {
         console.error("Error fetching entries:", error);
+      } finally {
+        setLoading(false);
       }
     };
 
@@ -115,7 +118,23 @@ export default function FeedPage() {
           onReset={handleResetFilters}
         />
 
-        {filteredAndSortedEntries.length === 0 ? (
+        {loading ? (
+          <div
+            style={{
+              textAlign: "center",
+              padding: "2rem",
+              borderRadius: "16px",
+              backgroundColor: "#ffffff",
+              border: "1px solid #e5e7eb",
+              boxShadow: "0 6px 18px rgba(15, 23, 42, 0.04)",
+              color: "#64748b",
+              fontSize: "1rem",
+              fontWeight: 500,
+            }}
+          >
+            Loading stories...
+          </div>
+        ) : filteredAndSortedEntries.length === 0 ? (
           <div
             style={{
               textAlign: "center",

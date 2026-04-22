@@ -14,6 +14,7 @@ export default function SubmitEntryPage() {
   const [step, setStep] = useState(1);
   const [companies, setCompanies] = useState([]);
   const [errorMessage, setErrorMessage] = useState("");
+  const [submitting, setSubmitting] = useState(false);
 
   const [formData, setFormData] = useState({
     user_id: 1,
@@ -86,9 +87,11 @@ export default function SubmitEntryPage() {
     (company) => String(company.id) === String(formData.company_id)
   );
 
-  // 🔥 UPDATED SUBMIT HANDLER
   const handleSubmit = async () => {
+    if (submitting) return;
+
     setErrorMessage("");
+    setSubmitting(true);
 
     try {
       await axios.post("http://localhost:3001/api/entries", {
@@ -98,15 +101,13 @@ export default function SubmitEntryPage() {
         job_search_weeks: Number(formData.job_search_weeks),
       });
 
-      // ✅ Pass success message
       navigate("/", {
-        state: {
-          success: "Your layoff story was successfully submitted.",
-        },
+        state: { success: "Your layoff story was submitted successfully." },
       });
     } catch (error) {
       console.error("Error submitting entry:", error);
       setErrorMessage("Failed to submit entry. Please try again.");
+      setSubmitting(false);
     }
   };
 
@@ -154,6 +155,7 @@ export default function SubmitEntryPage() {
             handleSubmit={handleSubmit}
             currentStep={step}
             totalSteps={4}
+            submitting={submitting}
           />
         )}
       </div>

@@ -49,18 +49,24 @@ export default function EntryModal({ entry, onClose }) {
           backgroundColor: "#ffffff",
           borderRadius: "20px",
           width: "100%",
-          maxWidth: "720px",
+          maxWidth: "760px",
           maxHeight: "90vh",
           overflowY: "auto",
           boxShadow: "0 20px 50px rgba(15, 23, 42, 0.25)",
           border: "1px solid #e5e7eb",
-          padding: "1.75rem",
+          padding: "2rem",
           position: "relative",
         }}
       >
         <button
           onClick={onClose}
           aria-label="Close modal"
+          onMouseEnter={(e) => {
+            e.currentTarget.style.backgroundColor = "#e2e8f0";
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.backgroundColor = "#f8fafc";
+          }}
           style={{
             position: "absolute",
             top: "1rem",
@@ -74,6 +80,7 @@ export default function EntryModal({ entry, onClose }) {
             fontSize: "1.2rem",
             fontWeight: 700,
             cursor: "pointer",
+            transition: "background-color 0.15s ease",
           }}
         >
           ×
@@ -83,7 +90,7 @@ export default function EntryModal({ entry, onClose }) {
           <h2
             style={{
               margin: 0,
-              marginBottom: "0.35rem",
+              marginBottom: "0.5rem",
               fontSize: "2rem",
               fontWeight: 800,
               color: "#0f172a",
@@ -212,8 +219,11 @@ export default function EntryModal({ entry, onClose }) {
               Severance
             </div>
             <div style={{ fontSize: "1rem", color: "#0f172a", fontWeight: 600 }}>
-              {entry.severance_weeks !== null && entry.severance_weeks !== undefined
-                ? `${entry.severance_weeks} week${entry.severance_weeks === 1 ? "" : "s"}`
+              {entry.severance_weeks !== null &&
+              entry.severance_weeks !== undefined
+                ? `${entry.severance_weeks} week${
+                    entry.severance_weeks === 1 ? "" : "s"
+                  }`
                 : "N/A"}
             </div>
           </div>
@@ -239,8 +249,11 @@ export default function EntryModal({ entry, onClose }) {
               Job Search Time
             </div>
             <div style={{ fontSize: "1rem", color: "#0f172a", fontWeight: 600 }}>
-              {entry.job_search_weeks !== null && entry.job_search_weeks !== undefined
-                ? `${entry.job_search_weeks} week${entry.job_search_weeks === 1 ? "" : "s"}`
+              {entry.job_search_weeks !== null &&
+              entry.job_search_weeks !== undefined
+                ? `${entry.job_search_weeks} week${
+                    entry.job_search_weeks === 1 ? "" : "s"
+                  }`
                 : "N/A"}
             </div>
           </div>
@@ -273,35 +286,44 @@ export default function EntryModal({ entry, onClose }) {
 
         <div
           style={{
-            backgroundColor: "#f8fafc",
-            border: "1px solid #e5e7eb",
-            borderRadius: "16px",
-            padding: "1.15rem",
+            marginTop: "1rem",
+            borderTop: "1px solid #e5e7eb",
+            paddingTop: "1.25rem",
           }}
         >
           <div
             style={{
-              fontSize: "1rem",
-              fontWeight: 700,
-              color: "#334155",
-              marginBottom: "0.75rem",
+              backgroundColor: "#f8fafc",
+              border: "1px solid #e5e7eb",
+              borderRadius: "16px",
+              padding: "1.15rem",
             }}
           >
-            Summary
-          </div>
+            <div
+              style={{
+                fontSize: "1rem",
+                fontWeight: 700,
+                color: "#334155",
+                marginBottom: "0.75rem",
+              }}
+            >
+              Summary
+            </div>
 
-          <p
-            style={{
-              margin: 0,
-              color: "#0f172a",
-              fontSize: "1rem",
-              lineHeight: 1.7,
-              whiteSpace: "pre-wrap",
-              wordBreak: "break-word",
-            }}
-          >
-            {entry.summary || "No summary provided."}
-          </p>
+            <p
+              style={{
+                margin: 0,
+                color: "#0f172a",
+                fontSize: "1rem",
+                lineHeight: 1.7,
+                whiteSpace: "pre-wrap",
+                wordBreak: "break-word",
+                textAlign: "left",
+              }}
+            >
+              {entry.summary || "No summary provided."}
+            </p>
+          </div>
         </div>
       </div>
     </div>
