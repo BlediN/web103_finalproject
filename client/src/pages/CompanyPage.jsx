@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useParams, Link, useLocation, useNavigate } from "react-router-dom";
+import { useParams, Link } from "react-router-dom";
 import axios from "axios";
 import EntryModal from "../components/EntryModal";
 import NotFound from "./NotFound";
@@ -12,10 +12,7 @@ export default function CompanyPage() {
   const [selectedEntry, setSelectedEntry] = useState(null);
   const [loading, setLoading] = useState(true);
   const [deleting, setDeleting] = useState(false);
-
-  const location = useLocation();
-  const navigate = useNavigate();
-  const successMessage = location.state?.success;
+  const [successMessage, setSuccessMessage] = useState("");
 
   const fetchEntries = async () => {
     try {
@@ -32,17 +29,7 @@ export default function CompanyPage() {
     fetchEntries();
   }, []);
 
-  useEffect(() => {
-    if (successMessage) {
-      const timer = setTimeout(() => {
-        navigate(location.pathname, { replace: true, state: {} });
-      }, 3000);
-
-      return () => clearTimeout(timer);
-    }
-  }, [successMessage, navigate, location.pathname]);
-
-  const handleDeleteEntry = async (entryId) => {
+  const handleDelete = async (id) => {
     const confirmed = window.confirm(
       "Are you sure you want to delete this story? This cannot be undone."
     );
@@ -51,13 +38,10 @@ export default function CompanyPage() {
 
     try {
       setDeleting(true);
-      await axios.delete(`http://localhost:3001/api/entries/${entryId}`);
-      setSelectedEntry(null);
+      await axios.delete(`http://localhost:3001/api/entries/${id}`);
       await fetchEntries();
-      navigate(location.pathname, {
-        replace: true,
-        state: { success: "Story deleted successfully." },
-      });
+      setSelectedEntry(null);
+      setSuccessMessage("Story deleted successfully.");
     } catch (error) {
       console.error("Error deleting entry:", error);
     } finally {
@@ -65,13 +49,38 @@ export default function CompanyPage() {
     }
   };
 
-  const companyExists = entries.some(
-    (entry) => entry.company_name === decodedCompany
-  );
+  const handleUpdate = async (id, updatedData) => {
+    try {
+      const response = await axios.patch(
+        `http://localhost:3001/api/entries/${id}`,
+        updatedData
+      );
+
+      await fetchEntries();
+      setSelectedEntry(response.data);
+      setSuccessMessage("Story updated successfully.");
+    } catch (error) {
+      console.error("Error updating entry:", error);
+      throw error;
+    }
+  };
+
+  useEffect(() => {
+    if (successMessage) {
+      const timer = setTimeout(() => {
+        setSuccessMessage("");
+      }, 3000);
+
+      return () => clearTimeout(timer);
+    }
+  }, [successMessage]);
 
   const companyEntries = entries
     .filter((entry) => entry.company_name === decodedCompany)
     .sort((a, b) => new Date(b.layoff_date) - new Date(a.layoff_date));
+
+  const companyExists =
+    loading || entries.some((entry) => entry.company_name === decodedCompany);
 
   if (!loading && !companyExists) {
     return <NotFound />;
@@ -94,14 +103,13 @@ export default function CompanyPage() {
         {successMessage && (
           <div
             style={{
-              backgroundColor: "#dcfce7",
-              color: "#166534",
-              border: "1px solid #bbf7d0",
-              padding: "0.9rem 1rem",
-              borderRadius: "12px",
+              background: "#d1fae5",
+              color: "#065f46",
+              padding: "12px",
+              borderRadius: "8px",
               marginBottom: "1rem",
+              textAlign: "center",
               fontWeight: 600,
-              boxShadow: "0 4px 12px rgba(22, 101, 52, 0.08)",
             }}
           >
             {successMessage}
@@ -124,9 +132,7 @@ export default function CompanyPage() {
 
         <div
           style={{
-            borderRadius: "20px",
-            padding: "0 0 1.5rem 0",
-            marginBottom: "1rem",
+            marginBottom: "1.5rem",
           }}
         >
           <h1
@@ -333,12 +339,15 @@ export default function CompanyPage() {
           ))
         )}
 
-        <EntryModal
-          entry={selectedEntry}
-          onClose={() => setSelectedEntry(null)}
-          onDelete={handleDeleteEntry}
-          deleting={deleting}
-        />
+        {selectedEntry && (
+          <EntryModal
+            entry={selectedEntry}
+            onClose={() => setSelectedEntry(null)}
+            onDelete={handleDelete}
+            onUpdate={handleUpdate}
+            deleting={deleting}
+          />
+        )}
       </div>
     </div>
   );
