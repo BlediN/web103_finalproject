@@ -1,32 +1,15 @@
 import { useEffect, useState } from "react";
-import { Link, useLocation, useNavigate } from "react-router-dom";
+import { useParams, Link } from "react-router-dom";
 import axios from "axios";
 import EntryModal from "../components/EntryModal";
-import FeedControls from "../components/FeedControls";
-import useFeedFilters from "../hooks/useFeedFilters";
 
-export default function FeedPage() {
+export default function CompanyPage() {
+  const { companyName } = useParams();
+  const decodedCompany = decodeURIComponent(companyName);
+
   const [entries, setEntries] = useState([]);
   const [selectedEntry, setSelectedEntry] = useState(null);
   const [loading, setLoading] = useState(true);
-
-  const location = useLocation();
-  const navigate = useNavigate();
-  const successMessage = location.state?.success;
-
-  const {
-    companyFilter,
-    setCompanyFilter,
-    jobTypeFilter,
-    setJobTypeFilter,
-    sortOrder,
-    setSortOrder,
-    searchTerm,
-    setSearchTerm,
-    handleResetFilters,
-    uniqueCompanies,
-    filteredAndSortedEntries,
-  } = useFeedFilters(entries);
 
   useEffect(() => {
     const fetchEntries = async () => {
@@ -43,15 +26,9 @@ export default function FeedPage() {
     fetchEntries();
   }, []);
 
-  useEffect(() => {
-    if (successMessage) {
-      const timer = setTimeout(() => {
-        navigate(location.pathname, { replace: true, state: {} });
-      }, 3000);
-
-      return () => clearTimeout(timer);
-    }
-  }, [successMessage, navigate, location.pathname]);
+  const companyEntries = entries
+    .filter((entry) => entry.company_name === decodedCompany)
+    .sort((a, b) => new Date(b.layoff_date) - new Date(a.layoff_date));
 
   return (
     <div
@@ -67,111 +44,118 @@ export default function FeedPage() {
           margin: "0 auto",
         }}
       >
-        {successMessage && (
-          <div
+        <Link
+          to="/"
+          style={{
+            display: "inline-block",
+            marginBottom: "1.25rem",
+            color: "#2563eb",
+            textDecoration: "none",
+            fontWeight: 600,
+            fontSize: "0.98rem",
+          }}
+        >
+          ← Back to Feed
+        </Link>
+
+        <div
+          style={{
+            borderRadius: "20px",
+            padding: "0 0 1.5rem 0",
+            marginBottom: "1rem",
+          }}
+        >
+          <h1
             style={{
-              backgroundColor: "#dcfce7",
-              color: "#166534",
-              border: "1px solid #bbf7d0",
-              padding: "0.9rem 1rem",
-              borderRadius: "12px",
-              marginBottom: "1rem",
-              fontWeight: 600,
-              boxShadow: "0 4px 12px rgba(22, 101, 52, 0.08)",
+              fontSize: "2.6rem",
+              fontWeight: 800,
+              color: "#0f172a",
+              marginBottom: "0.5rem",
             }}
           >
-            {successMessage}
-          </div>
-        )}
+            {decodedCompany} Stories
+          </h1>
 
-        <h1
-          style={{
-            fontSize: "2.5rem",
-            fontWeight: 700,
-            color: "#0f172a",
-            marginBottom: "0.35rem",
-          }}
-        >
-          Browse Layoff Stories
-        </h1>
+          <p
+            style={{
+              color: "#64748b",
+              fontSize: "1.05rem",
+              marginBottom: "0.85rem",
+            }}
+          >
+            Layoff experiences shared from professionals at {decodedCompany}.
+          </p>
 
-        <p
-          style={{
-            color: "#64748b",
-            fontSize: "1rem",
-            marginBottom: "1.5rem",
-          }}
-        >
-          Real experiences shared by professionals across companies.
-        </p>
-
-        <FeedControls
-          companyFilter={companyFilter}
-          setCompanyFilter={setCompanyFilter}
-          jobTypeFilter={jobTypeFilter}
-          setJobTypeFilter={setJobTypeFilter}
-          sortOrder={sortOrder}
-          setSortOrder={setSortOrder}
-          searchTerm={searchTerm}
-          setSearchTerm={setSearchTerm}
-          uniqueCompanies={uniqueCompanies}
-          onReset={handleResetFilters}
-        />
+          {!loading && (
+            <div
+              style={{
+                display: "inline-block",
+                padding: "0.5rem 0.85rem",
+                borderRadius: "999px",
+                backgroundColor: "#e0f2fe",
+                color: "#0369a1",
+                fontSize: "0.9rem",
+                fontWeight: 700,
+              }}
+            >
+              {companyEntries.length} stor{companyEntries.length === 1 ? "y" : "ies"}
+            </div>
+          )}
+        </div>
 
         {loading ? (
           <div
             style={{
-              textAlign: "center",
               padding: "2rem",
               borderRadius: "16px",
               backgroundColor: "#ffffff",
               border: "1px solid #e5e7eb",
               boxShadow: "0 6px 18px rgba(15, 23, 42, 0.04)",
+              textAlign: "center",
               color: "#64748b",
-              fontSize: "1rem",
               fontWeight: 500,
             }}
           >
-            Loading stories...
+            Loading company stories...
           </div>
-        ) : filteredAndSortedEntries.length === 0 ? (
+        ) : companyEntries.length === 0 ? (
           <div
             style={{
-              textAlign: "center",
               padding: "2rem",
               borderRadius: "16px",
               backgroundColor: "#ffffff",
               border: "1px solid #e5e7eb",
               boxShadow: "0 6px 18px rgba(15, 23, 42, 0.04)",
+              textAlign: "center",
             }}
           >
             <p
               style={{
-                marginBottom: "0.9rem",
                 color: "#334155",
                 fontSize: "1rem",
+                marginBottom: "1rem",
               }}
             >
-              No results match your filters.
+              No layoff stories found for {decodedCompany} yet.
             </p>
 
-            <button
-              onClick={handleResetFilters}
+            <Link
+              to="/submit"
               style={{
-                padding: "0.65rem 1rem",
-                borderRadius: "8px",
-                border: "none",
+                display: "inline-block",
+                padding: "0.7rem 1rem",
+                borderRadius: "10px",
                 backgroundColor: "#2563eb",
                 color: "#ffffff",
-                fontWeight: 500,
-                cursor: "pointer",
+                textDecoration: "none",
+                fontWeight: 600,
               }}
             >
-              Reset Filters
-            </button>
+              Submit the first story
+            </Link>
           </div>
         ) : (
-          filteredAndSortedEntries.map((entry) => (
+          companyEntries.map((entry) => (
             <div
               key={entry.id}
               onClick={() => setSelectedEntry(entry)}
@@ -201,24 +185,13 @@ export default function FeedPage() {
               <h3
                 style={{
                   marginBottom: "0.5rem",
-                  fontSize: "1.5rem",
+                  fontSize: "1.55rem",
                   fontWeight: 700,
                   color: "#475569",
                   textAlign: "left",
                 }}
               >
-                {entry.role || "Unknown role"}{" "}
-                <Link
-                  to={`/company/${encodeURIComponent(entry.company_name)}`}
-                  onClick={(e) => e.stopPropagation()}
-                  style={{
-                    color: "#2563eb",
-                    fontWeight: 700,
-                    textDecoration: "none",
-                  }}
-                >
-                  @ {entry.company_name}
-                </Link>
+                {entry.role || "Unknown role"}
               </h3>
 
               <p

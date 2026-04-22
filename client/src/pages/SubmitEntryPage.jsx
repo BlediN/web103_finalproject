@@ -14,6 +14,7 @@ export default function SubmitEntryPage() {
   const [step, setStep] = useState(1);
   const [companies, setCompanies] = useState([]);
   const [errorMessage, setErrorMessage] = useState("");
+  const [submitting, setSubmitting] = useState(false);
 
   const [formData, setFormData] = useState({
     user_id: 1,
@@ -87,7 +88,10 @@ export default function SubmitEntryPage() {
   );
 
   const handleSubmit = async () => {
+    if (submitting) return;
+
     setErrorMessage("");
+    setSubmitting(true);
 
     try {
       await axios.post("http://localhost:3001/api/entries", {
@@ -97,60 +101,64 @@ export default function SubmitEntryPage() {
         job_search_weeks: Number(formData.job_search_weeks),
       });
 
-      navigate("/");
+      navigate("/", {
+        state: { success: "Your layoff story was submitted successfully." },
+      });
     } catch (error) {
       console.error("Error submitting entry:", error);
       setErrorMessage("Failed to submit entry. Please try again.");
+      setSubmitting(false);
     }
   };
 
   return (
-  <div className="wrapper">
-    {errorMessage && (
-      <p style={{ color: "crimson", marginBottom: "1rem" }}>
-        {errorMessage}
-      </p>
-    )}
-
-    <div className="card">
-      {step === 1 && (
-        <Step1Intro nextStep={nextStep} currentStep={step} totalSteps={4} />
+    <div className="wrapper">
+      {errorMessage && (
+        <p style={{ color: "crimson", marginBottom: "1rem" }}>
+          {errorMessage}
+        </p>
       )}
 
-      {step === 2 && (
-        <Step2CompanyRole
-          formData={formData}
-          handleChange={handleChange}
-          nextStep={nextStep}
-          prevStep={prevStep}
-          companies={companies}
-          currentStep={step}
-          totalSteps={4}
-        />
-      )}
+      <div className="card">
+        {step === 1 && (
+          <Step1Intro nextStep={nextStep} currentStep={step} totalSteps={4} />
+        )}
 
-      {step === 3 && (
-        <Step3LayoffDetails
-          formData={formData}
-          handleChange={handleChange}
-          nextStep={nextStep}
-          prevStep={prevStep}
-          currentStep={step}
-          totalSteps={4}
-        />
-      )}
+        {step === 2 && (
+          <Step2CompanyRole
+            formData={formData}
+            handleChange={handleChange}
+            nextStep={nextStep}
+            prevStep={prevStep}
+            companies={companies}
+            currentStep={step}
+            totalSteps={4}
+          />
+        )}
 
-      {step === 4 && (
-        <Step4Review
-          formData={formData}
-          selectedCompany={selectedCompany}
-          prevStep={prevStep}
-          handleSubmit={handleSubmit}
-          currentStep={step}
-          totalSteps={4}
-        />
-      )}
+        {step === 3 && (
+          <Step3LayoffDetails
+            formData={formData}
+            handleChange={handleChange}
+            nextStep={nextStep}
+            prevStep={prevStep}
+            currentStep={step}
+            totalSteps={4}
+          />
+        )}
+
+        {step === 4 && (
+          <Step4Review
+            formData={formData}
+            selectedCompany={selectedCompany}
+            prevStep={prevStep}
+            handleSubmit={handleSubmit}
+            currentStep={step}
+            totalSteps={4}
+            submitting={submitting}
+          />
+        )}
+      </div>
     </div>
-  </div>
-);
+  );
 }
