@@ -14,41 +14,39 @@ export default function FeedControls({
 }) {
   const navigate = useNavigate();
 
-  const isDefault =
-    companyFilter === "" &&
-    jobTypeFilter === "" &&
-    sortOrder === "newest" &&
-    searchTerm === "";
+  const hasActiveFilters =
+    companyFilter !== "" ||
+    jobTypeFilter !== "" ||
+    sortOrder !== "newest" ||
+    searchTerm.trim() !== "";
 
   return (
     <div
       style={{
-        padding: "1rem",
-        borderRadius: "14px",
         backgroundColor: "#ffffff",
         border: "1px solid #e5e7eb",
-        boxShadow: "0 4px 14px rgba(15, 23, 42, 0.05)",
+        borderRadius: "18px",
+        padding: "1.25rem",
         marginBottom: "1.5rem",
+        boxShadow: "0 6px 18px rgba(15, 23, 42, 0.04)",
       }}
     >
-      <div style={{ marginBottom: "1rem" }}>
-        <input
-          type="text"
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          placeholder="Search by company, role, or keyword..."
-          style={{
-            width: "100%",
-            padding: "0.85rem 1rem",
-            borderRadius: "10px",
-            border: "1px solid #cbd5e1",
-            backgroundColor: "#ffffff",
-            color: "#0f172a",
-            fontSize: "0.95rem",
-            boxSizing: "border-box",
-          }}
-        />
-      </div>
+      <input
+        type="text"
+        placeholder="Search by company, role, or keyword..."
+        value={searchTerm}
+        onChange={(e) => setSearchTerm(e.target.value)}
+        style={{
+          width: "100%",
+          padding: "0.9rem 1rem",
+          borderRadius: "14px",
+          border: "1px solid #cbd5e1",
+          fontSize: "1rem",
+          marginBottom: "1rem",
+          outline: "none",
+          boxSizing: "border-box",
+        }}
+      />
 
       <div
         style={{
@@ -66,15 +64,16 @@ export default function FeedControls({
 
             if (selectedCompany) {
               navigate(`/company/${encodeURIComponent(selectedCompany)}`);
+            } else {
+              navigate("/");
             }
           }}
           style={{
-            padding: "0.75rem 0.9rem",
-            borderRadius: "10px",
+            padding: "0.9rem 1rem",
+            borderRadius: "14px",
             border: "1px solid #cbd5e1",
-            backgroundColor: "#ffffff",
-            color: "#0f172a",
-            fontSize: "0.95rem",
+            fontSize: "1rem",
+            minWidth: "180px",
           }}
         >
           <option value="">All Companies</option>
@@ -89,12 +88,11 @@ export default function FeedControls({
           value={jobTypeFilter}
           onChange={(e) => setJobTypeFilter(e.target.value)}
           style={{
-            padding: "0.75rem 0.9rem",
-            borderRadius: "10px",
+            padding: "0.9rem 1rem",
+            borderRadius: "14px",
             border: "1px solid #cbd5e1",
-            backgroundColor: "#ffffff",
-            color: "#0f172a",
-            fontSize: "0.95rem",
+            fontSize: "1rem",
+            minWidth: "180px",
           }}
         >
           <option value="">All Job Types</option>
@@ -108,12 +106,11 @@ export default function FeedControls({
           value={sortOrder}
           onChange={(e) => setSortOrder(e.target.value)}
           style={{
-            padding: "0.75rem 0.9rem",
-            borderRadius: "10px",
+            padding: "0.9rem 1rem",
+            borderRadius: "14px",
             border: "1px solid #cbd5e1",
-            backgroundColor: "#ffffff",
-            color: "#0f172a",
-            fontSize: "0.95rem",
+            fontSize: "1rem",
+            minWidth: "180px",
           }}
         >
           <option value="newest">Newest First</option>
@@ -122,17 +119,16 @@ export default function FeedControls({
 
         <button
           onClick={onReset}
-          disabled={isDefault}
+          disabled={!hasActiveFilters}
           style={{
-            padding: "0.75rem 1rem",
-            borderRadius: "10px",
+            padding: "0.9rem 1.25rem",
+            borderRadius: "14px",
             border: "none",
-            backgroundColor: isDefault ? "#94a3b8" : "#2563eb",
-            color: "white",
+            backgroundColor: hasActiveFilters ? "#2563eb" : "#94a3b8",
+            color: "#ffffff",
+            fontSize: "1rem",
             fontWeight: 600,
-            cursor: isDefault ? "not-allowed" : "pointer",
-            opacity: isDefault ? 0.7 : 1,
-            transition: "background-color 0.2s ease",
+            cursor: hasActiveFilters ? "pointer" : "not-allowed",
           }}
         >
           Reset Filters
