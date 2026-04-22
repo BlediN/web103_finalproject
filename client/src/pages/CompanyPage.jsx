@@ -1,11 +1,12 @@
 import { useEffect, useState } from "react";
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link, useLocation } from "react-router-dom";
 import axios from "axios";
 import EntryModal from "../components/EntryModal";
 import NotFound from "./NotFound";
 
 export default function CompanyPage() {
   const { companyName } = useParams();
+  const location = useLocation();
   const decodedCompany = decodeURIComponent(companyName);
 
   const [entries, setEntries] = useState([]);
@@ -28,6 +29,13 @@ export default function CompanyPage() {
   useEffect(() => {
     fetchEntries();
   }, []);
+
+  useEffect(() => {
+  if (location.state?.success) {
+    setSuccessMessage(location.state.success);
+    window.history.replaceState({}, document.title);
+  }
+}, [location.state]);
 
   const handleDelete = async (id) => {
     const confirmed = window.confirm(
