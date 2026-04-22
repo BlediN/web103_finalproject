@@ -26,13 +26,14 @@ export default function useFeedFilters(entries) {
         const matchesJobType =
           jobTypeFilter === "" || entry.job_type === jobTypeFilter;
 
-        const normalizedSearch = searchTerm.toLowerCase();
+        const normalizedSearch = searchTerm.trim().toLowerCase();
 
         const matchesSearch =
-          searchTerm === "" ||
+          normalizedSearch === "" ||
           entry.company_name?.toLowerCase().includes(normalizedSearch) ||
           entry.role?.toLowerCase().includes(normalizedSearch) ||
-          entry.summary?.toLowerCase().includes(normalizedSearch);
+          entry.summary?.toLowerCase().includes(normalizedSearch) ||
+          entry.location?.toLowerCase().includes(normalizedSearch);
 
         return matchesCompany && matchesJobType && matchesSearch;
       })

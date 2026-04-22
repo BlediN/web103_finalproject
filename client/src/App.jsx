@@ -2,6 +2,7 @@ import { BrowserRouter, Routes, Route, Link } from "react-router-dom";
 import FeedPage from "./pages/FeedPage";
 import SubmitEntryPage from "./pages/SubmitEntryPage";
 import CompanyPage from "./pages/CompanyPage";
+import NotFound from "./pages/NotFound";
 
 export default function App() {
   return (
@@ -25,6 +26,7 @@ export default function App() {
           <Route path="/" element={<FeedPage />} />
           <Route path="/submit" element={<SubmitEntryPage />} />
           <Route path="/company/:companyName" element={<CompanyPage />} />
+          <Route path="*" element={<NotFound />} />
         </Routes>
       </div>
     </BrowserRouter>

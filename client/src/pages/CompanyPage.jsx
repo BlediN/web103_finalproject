@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import axios from "axios";
 import EntryModal from "../components/EntryModal";
+import NotFound from "./NotFound";
 
 export default function CompanyPage() {
   const { companyName } = useParams();
@@ -26,9 +27,17 @@ export default function CompanyPage() {
     fetchEntries();
   }, []);
 
+  const companyExists = entries.some(
+    (entry) => entry.company_name === decodedCompany
+  );
+
   const companyEntries = entries
     .filter((entry) => entry.company_name === decodedCompany)
     .sort((a, b) => new Date(b.layoff_date) - new Date(a.layoff_date));
+
+  if (!loading && !companyExists) {
+    return <NotFound />;
+  }
 
   return (
     <div
