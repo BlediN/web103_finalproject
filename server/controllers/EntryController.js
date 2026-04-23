@@ -142,6 +142,13 @@ class EntryController {
   static async deleteEntry(req, res) {
     try {
       const { entryId } = req.params;
+
+      if (String(entryId).startsWith("ext-")) {
+        return res.status(400).json({
+          error: "External feed items cannot be deleted from this endpoint.",
+        });
+      }
+
       const deletedEntry = await EntryModel.deleteOne(entryId);
 
       if (!deletedEntry) {
@@ -152,6 +159,19 @@ class EntryController {
     } catch (error) {
       console.error("Error deleting entry:", error);
       res.status(500).json({ error: "Failed to delete entry." });
+    }
+  }
+
+  static async importNewsFeed(req, res) {
+    try {
+      const result = await EntryModel.importNewsFeed();
+      res.status(200).json({
+        message: "External feed import completed.",
+        ...result,
+      });
+    } catch (error) {
+      console.error("Error importing external feed:", error);
+      res.status(500).json({ error: error.message || "Failed to import external feed." });
     }
   }
 }

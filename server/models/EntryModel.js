@@ -1,29 +1,187 @@
 import pool from "../config/database.js";
+import crypto from "crypto";
+import dns from "dns";
+import { execFile } from "child_process";
+import { promisify } from "util";
+
+dns.setDefaultResultOrder("ipv4first");
+
+const execFileAsync = promisify(execFile);
+
+const GDELT_QUERY = `(layoff OR layoffs OR \"job cuts\" OR \"workforce reduction\")`;
+
+function buildGdeltUrl() {
+  const params = new URLSearchParams({
+    query: GDELT_QUERY,
+    mode: "ArtList",
+    format: "json",
+    maxrecords: "25",
+    sort: "HybridRel",
+  });
+
+  return `https://api.gdeltproject.org/api/v2/doc/doc?${params.toString()}`;
+}
+
+function buildExternalId(url) {
+  return crypto.createHash("sha256").update(url).digest("hex");
+}
+
+async function fetchJsonWithCurl(url) {
+  const curlBinary = process.platform === "win32" ? "curl.exe" : "curl";
+  const { stdout } = await execFileAsync(curlBinary, [
+    "--silent",
+    "--show-error",
+    "--location",
+    "--max-time",
+    "60",
+    url,
+  ]);
+
+  return JSON.parse(stdout || "{}");
+}
+
+function inferCompanyName(article) {
+  const rawTitle = article?.title || "";
+  const separators = [" lays off", " cuts", " to lay off", " announces", " amid"];
+
+  for (const separator of separators) {
+    const index = rawTitle.toLowerCase().indexOf(separator);
+    if (index > 0) {
+      return rawTitle.slice(0, index).trim();
+    }
+  }
+
+  return article?.domain?.trim() || article?.source?.name?.trim() || "Unknown Company";
+}
+
+function parseExternalDate(rawDate) {
+  if (!rawDate) {
+    return new Date();
+  }
+
+  if (typeof rawDate === "string" && /^\d{14}$/.test(rawDate)) {
+    const year = rawDate.slice(0, 4);
+    const month = rawDate.slice(4, 6);
+    const day = rawDate.slice(6, 8);
+    const hour = rawDate.slice(8, 10);
+    const minute = rawDate.slice(10, 12);
+    const second = rawDate.slice(12, 14);
+    return new Date(`${year}-${month}-${day}T${hour}:${minute}:${second}Z`);
+  }
+
+  const parsed = new Date(rawDate);
+  return parsed;
+}
+
+function formatExternalArticle(article) {
+  const sourceUrl = article?.url?.trim();
+
+  if (!sourceUrl) {
+    return null;
+  }
+
+  const publishedDate = parseExternalDate(
+    article?.seendate || article?.datetime || article?.publishedAt
+  );
+
+  const layoffDate = Number.isNaN(publishedDate.getTime())
+    ? new Date().toISOString().slice(0, 10)
+    : publishedDate.toISOString().slice(0, 10);
+
+  return {
+    external_id: buildExternalId(sourceUrl),
+    company_name: inferCompanyName(article),
+    role: "Layoff Report",
+    job_type: "News",
+    location: article?.sourceCountry || article?.domain || "Global",
+    layoff_date: layoffDate,
+    summary: (
+      article?.snippet || article?.description || article?.title || "No summary available."
+    ).trim(),
+    source_url: sourceUrl,
+    source_name: article?.domain || article?.source?.name || "GDELT",
+    source_type: "gdelt",
+  };
+}
 
 const EntryModel = {
+  async ensureExternalTable() {
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS external_entries (
+        id SERIAL PRIMARY KEY,
+        external_id VARCHAR NOT NULL UNIQUE,
+        company_name VARCHAR NOT NULL,
+        role VARCHAR NOT NULL DEFAULT 'Layoff Report',
+        job_type VARCHAR NOT NULL DEFAULT 'News',
+        location VARCHAR,
+        layoff_date DATE NOT NULL,
+        summary TEXT NOT NULL,
+        source_url TEXT NOT NULL,
+        source_name VARCHAR,
+        source_type VARCHAR NOT NULL DEFAULT 'gdelt',
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP
+      );
+    `);
+  },
+
   async getAll() {
+    await this.ensureExternalTable();
+
     const query = `
-      SELECT
-        e.id,
-        e.user_id,
-        e.company_id,
-        e.role,
-        e.job_type,
-        e.location,
-        e.severance_weeks,
-        e.layoff_date,
-        e.job_search_weeks,
-        e.is_anonymous,
-        e.summary,
-        e.created_at,
-        e.updated_at,
-        c.name AS company_name,
-        u.username
-      FROM entries e
-      JOIN companies c ON e.company_id = c.id
-      LEFT JOIN users u ON e.user_id = u.id
-      ORDER BY e.layoff_date DESC;
+      SELECT *
+      FROM (
+        SELECT
+          e.id::text AS id,
+          e.user_id,
+          e.company_id,
+          e.role,
+          e.job_type,
+          e.location,
+          e.severance_weeks,
+          e.layoff_date,
+          e.job_search_weeks,
+          e.is_anonymous,
+          e.summary,
+          e.created_at,
+          e.updated_at,
+          c.name AS company_name,
+          u.username,
+          NULL::text AS source_url,
+          NULL::text AS source_name,
+          'user'::text AS source_type,
+          false AS is_external
+        FROM entries e
+        JOIN companies c ON e.company_id = c.id
+        LEFT JOIN users u ON e.user_id = u.id
+
+        UNION ALL
+
+        SELECT
+          CONCAT('ext-', ex.id)::text AS id,
+          NULL::int AS user_id,
+          NULL::int AS company_id,
+          ex.role,
+          ex.job_type,
+          ex.location,
+          NULL::int AS severance_weeks,
+          ex.layoff_date,
+          NULL::int AS job_search_weeks,
+          true AS is_anonymous,
+          ex.summary,
+          ex.created_at,
+          ex.updated_at,
+          ex.company_name,
+          ex.source_name AS username,
+          ex.source_url,
+          ex.source_name,
+          ex.source_type,
+          true AS is_external
+        FROM external_entries ex
+      ) merged_entries
+      ORDER BY layoff_date DESC, created_at DESC;
     `;
+
     const result = await pool.query(query);
     return result.rows;
   },
@@ -161,6 +319,81 @@ const EntryModel = {
     `;
     const result = await pool.query(query, [entryId]);
     return result.rows[0];
+  },
+
+  async importNewsFeed() {
+    await this.ensureExternalTable();
+
+    const payload = await fetchJsonWithCurl(buildGdeltUrl());
+    const articles = Array.isArray(payload?.articles)
+      ? payload.articles
+      : Array.isArray(payload?.results)
+        ? payload.results
+        : [];
+
+    const normalizedArticles = articles
+      .map(formatExternalArticle)
+      .filter(Boolean);
+
+    const uniqueArticles = [...new Map(
+      normalizedArticles.map((article) => [article.external_id, article])
+    ).values()];
+
+    let importedCount = 0;
+
+    for (const article of uniqueArticles) {
+      const result = await pool.query(
+        `
+        INSERT INTO external_entries (
+          external_id,
+          company_name,
+          role,
+          job_type,
+          location,
+          layoff_date,
+          summary,
+          source_url,
+          source_name,
+          source_type
+        )
+        VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)
+        ON CONFLICT (external_id)
+        DO UPDATE SET
+          company_name = EXCLUDED.company_name,
+          role = EXCLUDED.role,
+          job_type = EXCLUDED.job_type,
+          location = EXCLUDED.location,
+          layoff_date = EXCLUDED.layoff_date,
+          summary = EXCLUDED.summary,
+          source_url = EXCLUDED.source_url,
+          source_name = EXCLUDED.source_name,
+          source_type = EXCLUDED.source_type,
+          updated_at = CURRENT_TIMESTAMP
+        RETURNING id;
+        `,
+        [
+          article.external_id,
+          article.company_name,
+          article.role,
+          article.job_type,
+          article.location,
+          article.layoff_date,
+          article.summary,
+          article.source_url,
+          article.source_name,
+          article.source_type,
+        ]
+      );
+
+      if (result.rows.length > 0) {
+        importedCount += 1;
+      }
+    }
+
+    return {
+      importedCount,
+      scannedCount: uniqueArticles.length,
+    };
   },
 };
 

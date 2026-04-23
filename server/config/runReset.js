@@ -6,6 +6,7 @@ export async function runReset() {
   try {
     await pool.query(`
       DROP TABLE IF EXISTS entries CASCADE;
+      DROP TABLE IF EXISTS external_entries CASCADE;
       DROP TABLE IF EXISTS companies CASCADE;
       DROP TABLE IF EXISTS industries CASCADE;
       DROP TABLE IF EXISTS users CASCADE;
@@ -46,6 +47,22 @@ export async function runReset() {
         job_search_weeks INT,
         is_anonymous BOOLEAN NOT NULL DEFAULT false,
         summary TEXT NOT NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP
+      );
+
+      CREATE TABLE external_entries (
+        id SERIAL PRIMARY KEY,
+        external_id VARCHAR NOT NULL UNIQUE,
+        company_name VARCHAR NOT NULL,
+        role VARCHAR NOT NULL DEFAULT 'Layoff Report',
+        job_type VARCHAR NOT NULL DEFAULT 'News',
+        location VARCHAR,
+        layoff_date DATE NOT NULL,
+        summary TEXT NOT NULL,
+        source_url TEXT NOT NULL,
+        source_name VARCHAR,
+        source_type VARCHAR NOT NULL DEFAULT 'gdelt',
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         updated_at TIMESTAMP
       );

@@ -89,3 +89,26 @@ A live feed of the latest layoff headlines pulled from a news API. This feature 
 ## Installation Instructions
 
 coming soon
+
+## External News Feed Integration
+
+LayoffLens now supports a hybrid feed:
+
+- User-submitted layoff stories (existing flow)
+- Imported layoff reports from GDELT
+
+### Setup
+
+1. Start the backend:
+
+	`cd server && npm start`
+
+2. Import external reports on demand:
+
+	`POST http://localhost:3001/api/entries/import/gdelt`
+
+3. Read unified feed:
+
+	`GET http://localhost:3001/api/entries`
+
+Imported items are tagged as external records and shown with source metadata.

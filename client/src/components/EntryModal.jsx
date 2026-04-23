@@ -106,6 +106,29 @@ export default function EntryModal({ entry, onClose, onDelete, deleting = false 
           >
             Full story details
           </p>
+
+          {(entry.is_external || entry.source_name) && (
+            <p
+              style={{
+                marginTop: "-0.75rem",
+                marginBottom: "1.25rem",
+                color: "#475569",
+                fontSize: "0.95rem",
+                fontWeight: 600,
+              }}
+            >
+              Source: {entry.source_name || "External Feed"}
+              {entry.source_url ? (
+                <>
+                  {" "}
+                  •{" "}
+                  <a href={entry.source_url} target="_blank" rel="noreferrer">
+                    Read Article
+                  </a>
+                </>
+              ) : null}
+            </p>
+          )}
         </div>
 
         <div
@@ -220,22 +243,24 @@ export default function EntryModal({ entry, onClose, onDelete, deleting = false 
             Close
           </button>
 
-          <button
-            onClick={() => onDelete?.(entry.id)}
-            disabled={deleting}
-            style={{
-              padding: "0.75rem 1rem",
-              borderRadius: "10px",
-              border: "none",
-              backgroundColor: "#dc2626",
-              color: "#ffffff",
-              fontWeight: 700,
-              cursor: deleting ? "not-allowed" : "pointer",
-              opacity: deleting ? 0.7 : 1,
-            }}
-          >
-            {deleting ? "Deleting..." : "Delete Story"}
-          </button>
+          {!entry.is_external && (
+            <button
+              onClick={() => onDelete?.(entry.id)}
+              disabled={deleting}
+              style={{
+                padding: "0.75rem 1rem",
+                borderRadius: "10px",
+                border: "none",
+                backgroundColor: "#dc2626",
+                color: "#ffffff",
+                fontWeight: 700,
+                cursor: deleting ? "not-allowed" : "pointer",
+                opacity: deleting ? 0.7 : 1,
+              }}
+            >
+              {deleting ? "Deleting..." : "Delete Story"}
+            </button>
+          )}
         </div>
       </div>
     </div>

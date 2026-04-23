@@ -314,19 +314,47 @@ export default function CompanyPage() {
                 • {entry.is_anonymous ? "Anonymous" : "Named"}
               </p>
 
+              {(entry.is_external || entry.source_name) && (
+                <p
+                  style={{
+                    color: "#475569",
+                    fontSize: "0.9rem",
+                    marginBottom: "0.9rem",
+                    textAlign: "left",
+                    fontWeight: 600,
+                  }}
+                >
+                  Source: {entry.source_name || "External Feed"}
+                  {entry.source_url ? (
+                    <>
+                      {" "}
+                      •{" "}
+                      <a
+                        href={entry.source_url}
+                        target="_blank"
+                        rel="noreferrer"
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        Read Article
+                      </a>
+                    </>
+                  ) : null}
+                </p>
+              )}
+
               <div style={{ textAlign: "left" }}>
                 <span
                   style={{
                     display: "inline-block",
                     padding: "0.55rem 0.9rem",
-                    backgroundColor: "#eff6ff",
-                    color: "#2563eb",
+                    backgroundColor: entry.is_external ? "#fef9c3" : "#eff6ff",
+                    color: entry.is_external ? "#854d0e" : "#2563eb",
                     borderRadius: "999px",
                     fontSize: "0.9rem",
                     fontWeight: 600,
                   }}
                 >
-                  View Details →
+                  {entry.is_external ? "External Report" : "View Details →"}
                 </span>
               </div>
             </div>
