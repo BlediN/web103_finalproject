@@ -358,17 +358,7 @@ const EntryModel = {
         )
         VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)
         ON CONFLICT (external_id)
-        DO UPDATE SET
-          company_name = EXCLUDED.company_name,
-          role = EXCLUDED.role,
-          job_type = EXCLUDED.job_type,
-          location = EXCLUDED.location,
-          layoff_date = EXCLUDED.layoff_date,
-          summary = EXCLUDED.summary,
-          source_url = EXCLUDED.source_url,
-          source_name = EXCLUDED.source_name,
-          source_type = EXCLUDED.source_type,
-          updated_at = CURRENT_TIMESTAMP
+        DO NOTHING
         RETURNING id;
         `,
         [

@@ -6,10 +6,13 @@ import FeedControls from "../components/FeedControls";
 import useFeedFilters from "../hooks/useFeedFilters";
 
 export default function FeedPage() {
+  const FEEDS_PER_PAGE = 20;
+
   const [entries, setEntries] = useState([]);
   const [selectedEntry, setSelectedEntry] = useState(null);
   const [loading, setLoading] = useState(true);
   const [deleting, setDeleting] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
 
   const location = useLocation();
   const navigate = useNavigate();
@@ -29,6 +32,16 @@ export default function FeedPage() {
     filteredAndSortedEntries,
   } = useFeedFilters(entries);
 
+  const totalPages = Math.max(
+    1,
+    Math.ceil(filteredAndSortedEntries.length / FEEDS_PER_PAGE)
+  );
+
+  const paginatedEntries = filteredAndSortedEntries.slice(
+    (currentPage - 1) * FEEDS_PER_PAGE,
+    currentPage * FEEDS_PER_PAGE
+  );
+
   const fetchEntries = async () => {
     try {
       const response = await axios.get("http://localhost:3001/api/entries");
@@ -43,6 +56,22 @@ export default function FeedPage() {
   useEffect(() => {
     fetchEntries();
   }, []);
+
+  useEffect(() => {
+    if (location.state?.refreshFeed) {
+      fetchEntries();
+    }
+  }, [location.state?.refreshFeed]);
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [companyFilter, jobTypeFilter, sortOrder, searchTerm]);
+
+  useEffect(() => {
+    if (currentPage > totalPages) {
+      setCurrentPage(totalPages);
+    }
+  }, [currentPage, totalPages]);
 
   useEffect(() => {
     if (successMessage) {
@@ -195,7 +224,7 @@ export default function FeedPage() {
             </button>
           </div>
         ) : (
-          filteredAndSortedEntries.map((entry) => (
+          paginatedEntries.map((entry) => (
             <div
               key={entry.id}
               onClick={() => setSelectedEntry(entry)}
@@ -346,6 +375,67 @@ export default function FeedPage() {
               </div>
             </div>
           ))
+        )}
+
+        {!loading && filteredAndSortedEntries.length > FEEDS_PER_PAGE && (
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              gap: "1rem",
+              marginTop: "1rem",
+              padding: "0.9rem 1rem",
+              borderRadius: "12px",
+              border: "1px solid #e5e7eb",
+              backgroundColor: "#ffffff",
+            }}
+          >
+            <button
+              onClick={() => setCurrentPage((prev) => Math.max(1, prev - 1))}
+              disabled={currentPage === 1}
+              style={{
+                padding: "0.6rem 0.9rem",
+                borderRadius: "8px",
+                border: "1px solid #cbd5e1",
+                backgroundColor: currentPage === 1 ? "#f1f5f9" : "#ffffff",
+                color: "#334155",
+                fontWeight: 600,
+                cursor: currentPage === 1 ? "not-allowed" : "pointer",
+              }}
+            >
+              Previous
+            </button>
+
+            <span
+              style={{
+                color: "#475569",
+                fontWeight: 600,
+                fontSize: "0.95rem",
+              }}
+            >
+              Page {currentPage} of {totalPages}
+            </span>
+
+            <button
+              onClick={() =>
+                setCurrentPage((prev) => Math.min(totalPages, prev + 1))
+              }
+              disabled={currentPage === totalPages}
+              style={{
+                padding: "0.6rem 0.9rem",
+                borderRadius: "8px",
+                border: "1px solid #cbd5e1",
+                backgroundColor:
+                  currentPage === totalPages ? "#f1f5f9" : "#ffffff",
+                color: "#334155",
+                fontWeight: 600,
+                cursor: currentPage === totalPages ? "not-allowed" : "pointer",
+              }}
+            >
+              Next
+            </button>
+          </div>
         )}
 
         <EntryModal
