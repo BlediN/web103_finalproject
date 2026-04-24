@@ -1,5 +1,5 @@
-import { useEffect, useState } from "react";
-import { Link, useLocation, useNavigate } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { Link, useLocation } from "react-router-dom";
 import axios from "axios";
 import EntryModal from "../components/EntryModal";
 import FeedControls from "../components/FeedControls";
@@ -7,16 +7,43 @@ import useFeedFilters from "../hooks/useFeedFilters";
 
 export default function FeedPage() {
   const FEEDS_PER_PAGE = 20;
+  const location = useLocation();
 
   const [entries, setEntries] = useState([]);
   const [selectedEntry, setSelectedEntry] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [successMessage, setSuccessMessage] = useState("");
   const [deleting, setDeleting] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
+  const [loading, setLoading] = useState(true);
 
-  const location = useLocation();
-  const navigate = useNavigate();
-  const successMessage = location.state?.success;
+  const fetchEntries = async () => {
+    try {
+      setLoading(true);
+      const response = await axios.get("http://localhost:3001/api/entries");
+      setEntries(response.data);
+    } catch (error) {
+      console.error("Error fetching entries:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchEntries();
+  }, []);
+
+  useEffect(() => {
+    if (location.state?.success) {
+      setSuccessMessage(location.state.success);
+      window.history.replaceState({}, document.title);
+    }
+  }, [location.state]);
+
+  useEffect(() => {
+    if (location.state?.refreshFeed) {
+      fetchEntries();
+    }
+  }, [location.state?.refreshFeed]);
 
   const {
     companyFilter,
@@ -32,6 +59,10 @@ export default function FeedPage() {
     filteredAndSortedEntries,
   } = useFeedFilters(entries);
 
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [companyFilter, jobTypeFilter, sortOrder, searchTerm]);
+
   const totalPages = Math.max(
     1,
     Math.ceil(filteredAndSortedEntries.length / FEEDS_PER_PAGE)
@@ -42,48 +73,13 @@ export default function FeedPage() {
     currentPage * FEEDS_PER_PAGE
   );
 
-  const fetchEntries = async () => {
-    try {
-      const response = await axios.get("http://localhost:3001/api/entries");
-      setEntries(response.data);
-    } catch (error) {
-      console.error("Error fetching entries:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchEntries();
-  }, []);
-
-  useEffect(() => {
-    if (location.state?.refreshFeed) {
-      fetchEntries();
-    }
-  }, [location.state?.refreshFeed]);
-
-  useEffect(() => {
-    setCurrentPage(1);
-  }, [companyFilter, jobTypeFilter, sortOrder, searchTerm]);
-
   useEffect(() => {
     if (currentPage > totalPages) {
       setCurrentPage(totalPages);
     }
   }, [currentPage, totalPages]);
 
-  useEffect(() => {
-    if (successMessage) {
-      const timer = setTimeout(() => {
-        navigate(location.pathname, { replace: true, state: {} });
-      }, 3000);
-
-      return () => clearTimeout(timer);
-    }
-  }, [successMessage, navigate, location.pathname]);
-
-  const handleDeleteEntry = async (entryId) => {
+  const handleDelete = async (id) => {
     const confirmed = window.confirm(
       "Are you sure you want to delete this story? This cannot be undone."
     );
@@ -92,13 +88,10 @@ export default function FeedPage() {
 
     try {
       setDeleting(true);
-      await axios.delete(`http://localhost:3001/api/entries/${entryId}`);
-      setSelectedEntry(null);
+      await axios.delete(`http://localhost:3001/api/entries/${id}`);
       await fetchEntries();
-      navigate(location.pathname, {
-        replace: true,
-        state: { success: "Story deleted successfully." },
-      });
+      setSelectedEntry(null);
+      setSuccessMessage("Story deleted successfully.");
     } catch (error) {
       console.error("Error deleting entry:", error);
     } finally {
@@ -106,345 +99,252 @@ export default function FeedPage() {
     }
   };
 
+  const handleUpdate = async (id, updatedData) => {
+    try {
+      await axios.patch(`http://localhost:3001/api/entries/${id}`, updatedData);
+      await fetchEntries();
+      setSelectedEntry(null);
+      setSuccessMessage("Story updated successfully.");
+    } catch (error) {
+      console.error("Error updating entry:", error);
+      throw error;
+    }
+  };
+
+  useEffect(() => {
+    if (successMessage) {
+      const timer = setTimeout(() => {
+        setSuccessMessage("");
+      }, 3000);
+
+      return () => clearTimeout(timer);
+    }
+  }, [successMessage]);
+
   return (
-    <div
-      style={{
-        minHeight: "100vh",
-        backgroundColor: "#f8fafc",
-        padding: "2rem 1rem",
-      }}
-    >
-      <div
-        style={{
-          maxWidth: "920px",
-          margin: "0 auto",
-        }}
-      >
-        {successMessage && (
-          <div
-            style={{
-              backgroundColor: "#dcfce7",
-              color: "#166534",
-              border: "1px solid #bbf7d0",
-              padding: "0.9rem 1rem",
-              borderRadius: "12px",
-              marginBottom: "1rem",
-              fontWeight: 600,
-              boxShadow: "0 4px 12px rgba(22, 101, 52, 0.08)",
-            }}
-          >
-            {successMessage}
-          </div>
-        )}
-
-        <h1
+    <div className="wrapper">
+      {successMessage && (
+        <div
           style={{
-            fontSize: "2.5rem",
-            fontWeight: 700,
-            color: "#0f172a",
-            marginBottom: "0.35rem",
+            background: "#d1fae5",
+            color: "#065f46",
+            padding: "12px",
+            borderRadius: "8px",
+            marginBottom: "1rem",
+            textAlign: "center",
+            fontWeight: 600,
           }}
         >
-          Browse Layoff Stories
-        </h1>
+          {successMessage}
+        </div>
+      )}
 
-        <p
-          style={{
-            color: "#64748b",
-            fontSize: "1rem",
-            marginBottom: "1.5rem",
-          }}
-        >
-          Real experiences shared by professionals across companies.
-        </p>
+      <h1>Browse Layoff Stories</h1>
+      <p>Real experiences shared by professionals across companies.</p>
 
-        <FeedControls
-          companyFilter={companyFilter}
-          setCompanyFilter={setCompanyFilter}
-          jobTypeFilter={jobTypeFilter}
-          setJobTypeFilter={setJobTypeFilter}
-          sortOrder={sortOrder}
-          setSortOrder={setSortOrder}
-          searchTerm={searchTerm}
-          setSearchTerm={setSearchTerm}
-          uniqueCompanies={uniqueCompanies}
-          onReset={handleResetFilters}
-        />
+      <FeedControls
+        companyFilter={companyFilter}
+        setCompanyFilter={setCompanyFilter}
+        jobTypeFilter={jobTypeFilter}
+        setJobTypeFilter={setJobTypeFilter}
+        sortOrder={sortOrder}
+        setSortOrder={setSortOrder}
+        searchTerm={searchTerm}
+        setSearchTerm={setSearchTerm}
+        uniqueCompanies={uniqueCompanies}
+        onReset={handleResetFilters}
+      />
 
-        {loading ? (
-          <div
+      {loading ? (
+        <div className="card" style={{ textAlign: "center" }}>
+          Loading stories...
+        </div>
+      ) : filteredAndSortedEntries.length === 0 ? (
+        <div className="card" style={{ textAlign: "center" }}>
+          <p style={{ marginBottom: "0.8rem" }}>
+            No stories match your current filters.
+          </p>
+          <button
+            onClick={handleResetFilters}
             style={{
-              textAlign: "center",
-              padding: "2rem",
-              borderRadius: "16px",
-              backgroundColor: "#ffffff",
-              border: "1px solid #e5e7eb",
-              boxShadow: "0 6px 18px rgba(15, 23, 42, 0.04)",
-              color: "#64748b",
-              fontSize: "1rem",
+              padding: "0.65rem 1rem",
+              borderRadius: "8px",
+              border: "none",
+              backgroundColor: "#2563eb",
+              color: "#ffffff",
               fontWeight: 500,
+              cursor: "pointer",
             }}
           >
-            Loading stories...
-          </div>
-        ) : filteredAndSortedEntries.length === 0 ? (
+            Reset Filters
+          </button>
+        </div>
+      ) : (
+        paginatedEntries.map((entry) => (
           <div
+            key={entry.id}
+            className="card"
+            onClick={() => setSelectedEntry(entry)}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.transform = "translateY(-3px)";
+              e.currentTarget.style.boxShadow =
+                "0 10px 24px rgba(15, 23, 42, 0.08)";
+              e.currentTarget.style.borderColor = "#cbd5e1";
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.transform = "none";
+              e.currentTarget.style.boxShadow = "0 6px 18px rgba(15, 23, 42, 0.04)";
+              e.currentTarget.style.borderColor = "#e5e7eb";
+            }}
             style={{
-              textAlign: "center",
-              padding: "2rem",
-              borderRadius: "16px",
-              backgroundColor: "#ffffff",
-              border: "1px solid #e5e7eb",
-              boxShadow: "0 6px 18px rgba(15, 23, 42, 0.04)",
+              cursor: "pointer",
+              transition: "all 0.18s ease",
             }}
           >
-            <p
-              style={{
-                marginBottom: "0.9rem",
-                color: "#334155",
-                fontSize: "1rem",
-              }}
-            >
-              No results match your filters.
+            <h3 style={{ marginBottom: "0.5rem" }}>
+              {entry.role || "Unknown role"}{" "}
+              <Link
+                to={`/company/${encodeURIComponent(entry.company_name)}`}
+                onClick={(e) => e.stopPropagation()}
+                style={{ color: "#2563eb", fontWeight: 700, textDecoration: "none" }}
+              >
+                @ {entry.company_name}
+              </Link>
+            </h3>
+
+            <p>{entry.summary || "No summary provided."}</p>
+
+            <p>
+              {entry.location || "Unknown location"} • {entry.job_type || "Unknown job type"} •{" "}
+              {entry.layoff_date
+                ? new Date(entry.layoff_date).toLocaleDateString("en-US", {
+                    year: "numeric",
+                    month: "short",
+                    day: "numeric",
+                  })
+                : "Unknown date"}
             </p>
 
-            <button
-              onClick={handleResetFilters}
-              style={{
-                padding: "0.65rem 1rem",
-                borderRadius: "8px",
-                border: "none",
-                backgroundColor: "#2563eb",
-                color: "#ffffff",
-                fontWeight: 500,
-                cursor: "pointer",
-              }}
-            >
-              Reset Filters
-            </button>
-          </div>
-        ) : (
-          paginatedEntries.map((entry) => (
-            <div
-              key={entry.id}
-              onClick={() => setSelectedEntry(entry)}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.transform = "translateY(-3px)";
-                e.currentTarget.style.boxShadow =
-                  "0 10px 24px rgba(15, 23, 42, 0.08)";
-                e.currentTarget.style.borderColor = "#cbd5e1";
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.transform = "none";
-                e.currentTarget.style.boxShadow =
-                  "0 6px 18px rgba(15, 23, 42, 0.04)";
-                e.currentTarget.style.borderColor = "#e5e7eb";
-              }}
-              style={{
-                border: "1px solid #e5e7eb",
-                borderRadius: "16px",
-                padding: "1.5rem",
-                marginBottom: "1rem",
-                backgroundColor: "#ffffff",
-                boxShadow: "0 6px 18px rgba(15, 23, 42, 0.04)",
-                cursor: "pointer",
-                transition: "all 0.18s ease",
-              }}
-            >
-              <h3
-                style={{
-                  marginBottom: "0.5rem",
-                  fontSize: "1.5rem",
-                  fontWeight: 700,
-                  color: "#475569",
-                  textAlign: "left",
-                }}
-              >
-                {entry.role || "Unknown role"}{" "}
-                <Link
-                  to={`/company/${encodeURIComponent(entry.company_name)}`}
-                  onClick={(e) => e.stopPropagation()}
-                  style={{
-                    color: "#2563eb",
-                    fontWeight: 700,
-                    textDecoration: "none",
-                  }}
-                >
-                  @ {entry.company_name}
-                </Link>
-              </h3>
+            <p>
+              Severance:{" "}
+              {entry.severance_weeks !== null && entry.severance_weeks !== undefined
+                ? `${entry.severance_weeks} week${entry.severance_weeks === 1 ? "" : "s"}`
+                : "N/A"}{" "}
+              • Job search:{" "}
+              {entry.job_search_weeks !== null &&
+              entry.job_search_weeks !== undefined
+                ? `${entry.job_search_weeks} week${entry.job_search_weeks === 1 ? "" : "s"}`
+                : "N/A"}{" "}
+              • {entry.is_anonymous ? "Anonymous" : "Named"}
+            </p>
 
+            {(entry.is_external || entry.source_name) && (
               <p
                 style={{
                   color: "#475569",
-                  marginBottom: "0.9rem",
-                  fontSize: "1.05rem",
-                  lineHeight: 1.5,
-                  textAlign: "left",
-                }}
-              >
-                {entry.summary || "No summary provided."}
-              </p>
-
-              <p
-                style={{
-                  color: "#64748b",
-                  fontSize: "0.95rem",
-                  marginBottom: "0.75rem",
-                  textAlign: "left",
-                }}
-              >
-                {entry.location || "Unknown location"} •{" "}
-                {entry.job_type || "Unknown job type"} •{" "}
-                {entry.layoff_date
-                  ? new Date(entry.layoff_date).toLocaleDateString("en-US", {
-                      year: "numeric",
-                      month: "short",
-                      day: "numeric",
-                    })
-                  : "Unknown date"}
-              </p>
-
-              <p
-                style={{
-                  color: "#94a3b8",
                   fontSize: "0.9rem",
-                  marginBottom: "1rem",
+                  marginBottom: "0.9rem",
                   textAlign: "left",
+                  fontWeight: 600,
                 }}
               >
-                Severance:{" "}
-                {entry.severance_weeks !== null &&
-                entry.severance_weeks !== undefined
-                  ? `${entry.severance_weeks} week${
-                      entry.severance_weeks === 1 ? "" : "s"
-                    }`
-                  : "N/A"}{" "}
-                • Job search:{" "}
-                {entry.job_search_weeks !== null &&
-                entry.job_search_weeks !== undefined
-                  ? `${entry.job_search_weeks} week${
-                      entry.job_search_weeks === 1 ? "" : "s"
-                    }`
-                  : "N/A"}{" "}
-                • {entry.is_anonymous ? "Anonymous" : "Named"}
+                Source: {entry.source_name || "External Feed"}
+                {entry.source_url ? (
+                  <>
+                    {" "}•{" "}
+                    <a
+                      href={entry.source_url}
+                      target="_blank"
+                      rel="noreferrer"
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      Read Article
+                    </a>
+                  </>
+                ) : null}
               </p>
+            )}
 
-              {(entry.is_external || entry.source_name) && (
-                <p
-                  style={{
-                    color: "#475569",
-                    fontSize: "0.9rem",
-                    marginBottom: "0.9rem",
-                    textAlign: "left",
-                    fontWeight: 600,
-                  }}
-                >
-                  Source: {entry.source_name || "External Feed"}
-                  {entry.source_url ? (
-                    <>
-                      {" "}
-                      •{" "}
-                      <a
-                        href={entry.source_url}
-                        target="_blank"
-                        rel="noreferrer"
-                        onClick={(e) => e.stopPropagation()}
-                      >
-                        Read Article
-                      </a>
-                    </>
-                  ) : null}
-                </p>
-              )}
-
-              <div style={{ textAlign: "left" }}>
-                <span
-                  style={{
-                    display: "inline-block",
-                    padding: "0.55rem 0.9rem",
-                    backgroundColor: entry.is_external ? "#fef9c3" : "#eff6ff",
-                    color: entry.is_external ? "#854d0e" : "#2563eb",
-                    borderRadius: "999px",
-                    fontSize: "0.9rem",
-                    fontWeight: 600,
-                  }}
-                >
-                  {entry.is_external ? "External Report" : "View Details →"}
-                </span>
-              </div>
+            <div style={{ textAlign: "left" }}>
+              <span
+                style={{
+                  display: "inline-block",
+                  padding: "0.55rem 0.9rem",
+                  backgroundColor: entry.is_external ? "#fef9c3" : "#eff6ff",
+                  color: entry.is_external ? "#854d0e" : "#2563eb",
+                  borderRadius: "999px",
+                  fontSize: "0.9rem",
+                  fontWeight: 600,
+                }}
+              >
+                {entry.is_external ? "External Report" : "View Details →"}
+              </span>
             </div>
-          ))
-        )}
+          </div>
+        ))
+      )}
 
-        {!loading && filteredAndSortedEntries.length > FEEDS_PER_PAGE && (
-          <div
+      {!loading && filteredAndSortedEntries.length > FEEDS_PER_PAGE && (
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            gap: "1rem",
+            marginTop: "1rem",
+            padding: "0.9rem 1rem",
+            borderRadius: "12px",
+            border: "1px solid #e5e7eb",
+            backgroundColor: "#ffffff",
+          }}
+        >
+          <button
+            onClick={() => setCurrentPage((prev) => Math.max(1, prev - 1))}
+            disabled={currentPage === 1}
             style={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "space-between",
-              gap: "1rem",
-              marginTop: "1rem",
-              padding: "0.9rem 1rem",
-              borderRadius: "12px",
-              border: "1px solid #e5e7eb",
-              backgroundColor: "#ffffff",
+              padding: "0.6rem 0.9rem",
+              borderRadius: "8px",
+              border: "1px solid #cbd5e1",
+              backgroundColor: currentPage === 1 ? "#f1f5f9" : "#ffffff",
+              color: "#334155",
+              fontWeight: 600,
+              cursor: currentPage === 1 ? "not-allowed" : "pointer",
             }}
           >
-            <button
-              onClick={() => setCurrentPage((prev) => Math.max(1, prev - 1))}
-              disabled={currentPage === 1}
-              style={{
-                padding: "0.6rem 0.9rem",
-                borderRadius: "8px",
-                border: "1px solid #cbd5e1",
-                backgroundColor: currentPage === 1 ? "#f1f5f9" : "#ffffff",
-                color: "#334155",
-                fontWeight: 600,
-                cursor: currentPage === 1 ? "not-allowed" : "pointer",
-              }}
-            >
-              Previous
-            </button>
+            Previous
+          </button>
 
-            <span
-              style={{
-                color: "#475569",
-                fontWeight: 600,
-                fontSize: "0.95rem",
-              }}
-            >
-              Page {currentPage} of {totalPages}
-            </span>
+          <span style={{ color: "#475569", fontWeight: 600, fontSize: "0.95rem" }}>
+            Page {currentPage} of {totalPages}
+          </span>
 
-            <button
-              onClick={() =>
-                setCurrentPage((prev) => Math.min(totalPages, prev + 1))
-              }
-              disabled={currentPage === totalPages}
-              style={{
-                padding: "0.6rem 0.9rem",
-                borderRadius: "8px",
-                border: "1px solid #cbd5e1",
-                backgroundColor:
-                  currentPage === totalPages ? "#f1f5f9" : "#ffffff",
-                color: "#334155",
-                fontWeight: 600,
-                cursor: currentPage === totalPages ? "not-allowed" : "pointer",
-              }}
-            >
-              Next
-            </button>
-          </div>
-        )}
+          <button
+            onClick={() => setCurrentPage((prev) => Math.min(totalPages, prev + 1))}
+            disabled={currentPage === totalPages}
+            style={{
+              padding: "0.6rem 0.9rem",
+              borderRadius: "8px",
+              border: "1px solid #cbd5e1",
+              backgroundColor: currentPage === totalPages ? "#f1f5f9" : "#ffffff",
+              color: "#334155",
+              fontWeight: 600,
+              cursor: currentPage === totalPages ? "not-allowed" : "pointer",
+            }}
+          >
+            Next
+          </button>
+        </div>
+      )}
 
+      {selectedEntry && (
         <EntryModal
           entry={selectedEntry}
           onClose={() => setSelectedEntry(null)}
-          onDelete={handleDeleteEntry}
+          onDelete={handleDelete}
+          onUpdate={handleUpdate}
           deleting={deleting}
         />
-      </div>
+      )}
     </div>
   );
 }

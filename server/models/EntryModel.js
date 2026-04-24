@@ -1,10 +1,7 @@
 import pool from "../config/database.js";
 import crypto from "crypto";
-import dns from "dns";
 import { execFile } from "child_process";
 import { promisify } from "util";
-
-dns.setDefaultResultOrder("ipv4first");
 
 const execFileAsync = promisify(execFile);
 
@@ -209,6 +206,7 @@ const EntryModel = {
       LEFT JOIN users u ON e.user_id = u.id
       WHERE e.id = $1;
     `;
+
     const result = await pool.query(query, [entryId]);
     return result.rows[0];
   },
