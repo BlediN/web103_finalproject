@@ -1,13 +1,19 @@
-import { useState, useEffect } from "react";
+import { useCallback, useContext, useEffect, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import axios from "axios";
 import EntryModal from "../components/EntryModal";
 import FeedControls from "../components/FeedControls";
 import useFeedFilters from "../hooks/useFeedFilters";
+import Spinner from "../components/Spinner";
+import Toast from "../components/Toast";
+import { AuthContext } from "../context/AuthContext";
+import "./FeedPage.css";
 
 export default function FeedPage() {
   const FEEDS_PER_PAGE = 20;
   const location = useLocation();
+  const { user, isGuest } = useContext(AuthContext);
+  const canManagePosts = Boolean(user) && !isGuest;
 
   const [entries, setEntries] = useState([]);
   const [selectedEntry, setSelectedEntry] = useState(null);
@@ -16,21 +22,31 @@ export default function FeedPage() {
   const [currentPage, setCurrentPage] = useState(1);
   const [loading, setLoading] = useState(true);
 
-  const fetchEntries = async () => {
+  const fetchEntries = useCallback(async (forceRefresh = false) => {
     try {
       setLoading(true);
+
+      if (!forceRefresh) {
+        const cachedEntries = sessionStorage.getItem("feedEntries");
+        if (cachedEntries) {
+          setEntries(JSON.parse(cachedEntries));
+          return;
+        }
+      }
+
       const response = await axios.get("http://localhost:3001/api/entries");
       setEntries(response.data);
+      sessionStorage.setItem("feedEntries", JSON.stringify(response.data));
     } catch (error) {
       console.error("Error fetching entries:", error);
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
   useEffect(() => {
-    fetchEntries();
-  }, []);
+    fetchEntries(false);
+  }, [fetchEntries]);
 
   useEffect(() => {
     if (location.state?.success) {
@@ -41,9 +57,9 @@ export default function FeedPage() {
 
   useEffect(() => {
     if (location.state?.refreshFeed) {
-      fetchEntries();
+      fetchEntries(true);
     }
-  }, [location.state?.refreshFeed]);
+  }, [location.state?.refreshFeed, fetchEntries]);
 
   const {
     companyFilter,
@@ -68,18 +84,22 @@ export default function FeedPage() {
     Math.ceil(filteredAndSortedEntries.length / FEEDS_PER_PAGE)
   );
 
-  const paginatedEntries = filteredAndSortedEntries.slice(
-    (currentPage - 1) * FEEDS_PER_PAGE,
-    currentPage * FEEDS_PER_PAGE
-  );
-
   useEffect(() => {
     if (currentPage > totalPages) {
       setCurrentPage(totalPages);
     }
   }, [currentPage, totalPages]);
 
+  const startIndex = (currentPage - 1) * FEEDS_PER_PAGE;
+  const endIndex = startIndex + FEEDS_PER_PAGE;
+  const paginatedEntries = filteredAndSortedEntries.slice(startIndex, endIndex);
+
   const handleDelete = async (id) => {
+    if (!canManagePosts) {
+      alert("Please log in to delete posts.");
+      return;
+    }
+
     const confirmed = window.confirm(
       "Are you sure you want to delete this story? This cannot be undone."
     );
@@ -89,7 +109,7 @@ export default function FeedPage() {
     try {
       setDeleting(true);
       await axios.delete(`http://localhost:3001/api/entries/${id}`);
-      await fetchEntries();
+      await fetchEntries(true);
       setSelectedEntry(null);
       setSuccessMessage("Story deleted successfully.");
     } catch (error) {
@@ -100,9 +120,14 @@ export default function FeedPage() {
   };
 
   const handleUpdate = async (id, updatedData) => {
+    if (!canManagePosts) {
+      alert("Please log in to edit posts.");
+      return;
+    }
+
     try {
       await axios.patch(`http://localhost:3001/api/entries/${id}`, updatedData);
-      await fetchEntries();
+      await fetchEntries(true);
       setSelectedEntry(null);
       setSuccessMessage("Story updated successfully.");
     } catch (error) {
@@ -122,22 +147,8 @@ export default function FeedPage() {
   }, [successMessage]);
 
   return (
-    <div className="wrapper">
-      {successMessage && (
-        <div
-          style={{
-            background: "#d1fae5",
-            color: "#065f46",
-            padding: "12px",
-            borderRadius: "8px",
-            marginBottom: "1rem",
-            textAlign: "center",
-            fontWeight: 600,
-          }}
-        >
-          {successMessage}
-        </div>
-      )}
+    <div className="feed-wrapper">
+      <Toast message={successMessage} type="success" />
 
       <h1>Browse Layoff Stories</h1>
       <p>Real experiences shared by professionals across companies.</p>
@@ -156,10 +167,8 @@ export default function FeedPage() {
       />
 
       {loading ? (
-        <div className="card" style={{ textAlign: "center" }}>
-          Loading stories...
-        </div>
-      ) : filteredAndSortedEntries.length === 0 ? (
+        <Spinner />
+      ) : paginatedEntries.length === 0 ? (
         <div className="card" style={{ textAlign: "center" }}>
           <p style={{ marginBottom: "0.8rem" }}>
             No stories match your current filters.
@@ -241,7 +250,7 @@ export default function FeedPage() {
             {(entry.is_external || entry.source_name) && (
               <p
                 style={{
-                  color: "#475569",
+                  color: "var(--muted)",
                   fontSize: "0.9rem",
                   marginBottom: "0.9rem",
                   textAlign: "left",
@@ -267,17 +276,9 @@ export default function FeedPage() {
 
             <div style={{ textAlign: "left" }}>
               <span
-                style={{
-                  display: "inline-block",
-                  padding: "0.55rem 0.9rem",
-                  backgroundColor: entry.is_external ? "#fef9c3" : "#eff6ff",
-                  color: entry.is_external ? "#854d0e" : "#2563eb",
-                  borderRadius: "999px",
-                  fontSize: "0.9rem",
-                  fontWeight: 600,
-                }}
+                className={`feed-chip ${entry.is_external ? "external" : "internal"}`}
               >
-                {entry.is_external ? "External Report" : "View Details →"}
+                {entry.is_external ? "External Report" : "View Details ->"}
               </span>
             </div>
           </div>
@@ -343,6 +344,7 @@ export default function FeedPage() {
           onDelete={handleDelete}
           onUpdate={handleUpdate}
           deleting={deleting}
+          canManagePosts={canManagePosts}
         />
       )}
     </div>

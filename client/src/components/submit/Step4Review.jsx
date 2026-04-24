@@ -1,6 +1,6 @@
 export default function Step4Review({
   formData,
-  selectedCompany,
+  companyNameForReview,
   prevStep,
   handleSubmit,
   currentStep,
@@ -12,7 +12,7 @@ export default function Step4Review({
       <p
         style={{
           fontSize: "0.95rem",
-          color: "#64748b",
+          color: "var(--muted)",
           marginBottom: "0.5rem",
           fontWeight: 600,
         }}
@@ -24,41 +24,42 @@ export default function Step4Review({
 
       <div
         style={{
-          backgroundColor: "#f8fafc",
-          border: "1px solid #e5e7eb",
+          backgroundColor: "var(--surface)",
+          color: "var(--text)",
+          border: "1px solid var(--border)",
           borderRadius: "12px",
           padding: "1rem",
           marginBottom: "1.5rem",
           lineHeight: 1.8,
         }}
       >
-        <p>
-          <strong>Company:</strong> {selectedCompany?.name || "N/A"}
+        <p style={{ color: "var(--text)" }}>
+          <strong>Company:</strong> {companyNameForReview || "N/A"}
         </p>
-        <p>
+        <p style={{ color: "var(--text)" }}>
           <strong>Role:</strong> {formData.role || "N/A"}
         </p>
-        <p>
+        <p style={{ color: "var(--text)" }}>
           <strong>Job Type:</strong> {formData.job_type || "N/A"}
         </p>
-        <p>
+        <p style={{ color: "var(--text)" }}>
           <strong>Location:</strong> {formData.location || "N/A"}
         </p>
-        <p>
+        <p style={{ color: "var(--text)" }}>
           <strong>Layoff Date:</strong> {formData.layoff_date || "N/A"}
         </p>
-        <p>
+        <p style={{ color: "var(--text)" }}>
           <strong>Severance Weeks:</strong>{" "}
           {formData.severance_weeks !== "" ? formData.severance_weeks : "N/A"}
         </p>
-        <p>
+        <p style={{ color: "var(--text)" }}>
           <strong>Job Search Weeks:</strong>{" "}
           {formData.job_search_weeks !== "" ? formData.job_search_weeks : "N/A"}
         </p>
-        <p>
+        <p style={{ color: "var(--text)" }}>
           <strong>Anonymous:</strong> {formData.is_anonymous ? "Yes" : "No"}
         </p>
-        <p>
+        <p style={{ color: "var(--text)" }}>
           <strong>Summary:</strong> {formData.summary || "N/A"}
         </p>
       </div>

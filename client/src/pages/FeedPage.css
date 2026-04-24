@@ -1,0 +1,45 @@
+.feed-wrapper {
+  max-width: var(--page-max-width);
+  margin: 2rem auto;
+  padding: 0 1rem;
+  color: var(--text);
+}
+
+.feed-wrapper .card {
+  background: var(--surface);
+  border-radius: 16px;
+  border: 1px solid var(--border);
+  padding: 24px;
+  box-shadow: var(--card-shadow);
+}
+
+.feed-wrapper .card,
+.feed-wrapper .card p,
+.feed-wrapper .card h3,
+.feed-wrapper .card div {
+  color: var(--text) !important;
+}
+
+.feed-wrapper .card a {
+  color: #93c5fd !important;
+}
+
+.feed-chip {
+  display: inline-block;
+  padding: 0.55rem 0.9rem;
+  border-radius: 999px;
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+
+.feed-chip.external {
+  background-color: #3f2f00;
+  color: #fde68a !important;
+  border: 1px solid #b45309;
+}
+
+.feed-chip.internal {
+  background-color: #1e3a8a;
+  color: #dbeafe !important;
+  border: 1px solid #60a5fa;
+}

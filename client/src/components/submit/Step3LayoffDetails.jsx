@@ -1,3 +1,5 @@
+import { useState } from "react";
+
 export default function Step3LayoffDetails({
   formData,
   handleChange,
@@ -6,6 +8,18 @@ export default function Step3LayoffDetails({
   currentStep,
   totalSteps,
 }) {
+  const [clickedButton, setClickedButton] = useState(null);
+
+  const handleNext = () => {
+    setClickedButton("next");
+    nextStep();
+  };
+
+  const handlePrev = () => {
+    setClickedButton("back");
+    prevStep();
+  };
+
   return (
     <>
       <p className="step-text">
@@ -81,8 +95,12 @@ export default function Step3LayoffDetails({
       </div>
 
       <div className="button-row">
-        <button onClick={prevStep}>Back</button>
-        <button onClick={nextStep}>Next</button>
+        <button onClick={handlePrev} disabled={clickedButton === "back"}>
+          Back
+        </button>
+        <button onClick={handleNext} disabled={clickedButton === "next"}>
+          Next
+        </button>
       </div>
     </>
   );

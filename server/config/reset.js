@@ -7,6 +7,7 @@ const resetDatabase = async () => {
     console.log("Database reset and seeded successfully.");
   } catch (error) {
     console.error("Error resetting database:", error);
+    process.exitCode = 1;
   } finally {
     await pool.end();
   }

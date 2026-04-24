@@ -1,4 +1,13 @@
+import { useState } from "react";
+
 export default function Step1Intro({ nextStep, currentStep, totalSteps }) {
+  const [isClicked, setIsClicked] = useState(false);
+
+  const handleClick = () => {
+    setIsClicked(true);
+    nextStep();
+  };
+
   return (
     <>
       <p className="step-text">
@@ -12,7 +21,9 @@ export default function Step1Intro({ nextStep, currentStep, totalSteps }) {
 
       <div className="button-row">
         <div />
-        <button onClick={nextStep}>Start</button>
+        <button onClick={handleClick} disabled={isClicked}>
+          Start
+        </button>
       </div>
     </>
   );

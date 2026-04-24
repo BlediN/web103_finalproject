@@ -1,3 +1,5 @@
+import { useState } from "react";
+
 export default function Step2CompanyRole({
   formData,
   handleChange,
@@ -7,6 +9,18 @@ export default function Step2CompanyRole({
   currentStep,
   totalSteps,
 }) {
+  const [clickedButton, setClickedButton] = useState(null);
+
+  const handleNext = () => {
+    setClickedButton("next");
+    nextStep();
+  };
+
+  const handlePrev = () => {
+    setClickedButton("back");
+    prevStep();
+  };
+
   return (
     <>
       <p className="step-text">
@@ -25,7 +39,6 @@ export default function Step2CompanyRole({
             name="company_id"
             value={formData.company_id}
             onChange={handleChange}
-            required
           >
             <option value="">Select company</option>
             {companies.map((company) => (
@@ -34,6 +47,20 @@ export default function Step2CompanyRole({
               </option>
             ))}
           </select>
+          <small style={{ color: "#64748b", marginTop: "0.35rem" }}>
+            Can&apos;t find it? Enter it below.
+          </small>
+        </div>
+
+        <div className="form-group">
+          <label>Company (if not listed)</label>
+          <input
+            type="text"
+            name="custom_company_name"
+            value={formData.custom_company_name}
+            onChange={handleChange}
+            placeholder="e.g. Acme Labs"
+          />
         </div>
 
         <div className="form-group">
@@ -66,8 +93,12 @@ export default function Step2CompanyRole({
       </div>
 
       <div className="button-row">
-        <button onClick={prevStep}>Back</button>
-        <button onClick={nextStep}>Next</button>
+        <button onClick={handlePrev} disabled={clickedButton === "back"}>
+          Back
+        </button>
+        <button onClick={handleNext} disabled={clickedButton === "next"}>
+          Next
+        </button>
       </div>
     </>
   );

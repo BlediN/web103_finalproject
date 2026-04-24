@@ -1,12 +1,17 @@
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { useParams, Link, useLocation } from "react-router-dom";
 import axios from "axios";
 import EntryModal from "../components/EntryModal";
 import NotFound from "./NotFound";
+import Spinner from "../components/Spinner";
+import Toast from "../components/Toast";
+import { AuthContext } from "../context/AuthContext";
 
 export default function CompanyPage() {
   const { companyName } = useParams();
   const location = useLocation();
+  const { user, isGuest } = useContext(AuthContext);
+  const canManagePosts = Boolean(user) && !isGuest;
   const decodedCompany = decodeURIComponent(companyName);
 
   const [entries, setEntries] = useState([]);
@@ -38,6 +43,11 @@ export default function CompanyPage() {
 }, [location.state]);
 
   const handleDelete = async (id) => {
+    if (!canManagePosts) {
+      alert("Please log in to delete posts.");
+      return;
+    }
+
     const confirmed = window.confirm(
       "Are you sure you want to delete this story? This cannot be undone."
     );
@@ -58,6 +68,11 @@ export default function CompanyPage() {
   };
 
   const handleUpdate = async (id, updatedData) => {
+    if (!canManagePosts) {
+      alert("Please log in to edit posts.");
+      return;
+    }
+
     try {
       await axios.patch(`http://localhost:3001/api/entries/${id}`, updatedData);
       await fetchEntries();
@@ -104,21 +119,7 @@ export default function CompanyPage() {
           margin: "0 auto",
         }}
       >
-        {successMessage && (
-          <div
-            style={{
-              background: "#d1fae5",
-              color: "#065f46",
-              padding: "12px",
-              borderRadius: "8px",
-              marginBottom: "1rem",
-              textAlign: "center",
-              fontWeight: 600,
-            }}
-          >
-            {successMessage}
-          </div>
-        )}
+        <Toast message={successMessage} type="success" />
 
         <Link
           to="/"
@@ -178,20 +179,7 @@ export default function CompanyPage() {
         </div>
 
         {loading ? (
-          <div
-            style={{
-              padding: "2rem",
-              borderRadius: "16px",
-              backgroundColor: "#ffffff",
-              border: "1px solid #e5e7eb",
-              boxShadow: "0 6px 18px rgba(15, 23, 42, 0.04)",
-              textAlign: "center",
-              color: "#64748b",
-              fontWeight: 500,
-            }}
-          >
-            Loading company stories...
-          </div>
+          <Spinner />
         ) : companyEntries.length === 0 ? (
           <div
             style={{
@@ -339,6 +327,7 @@ export default function CompanyPage() {
             onDelete={handleDelete}
             onUpdate={handleUpdate}
             deleting={deleting}
+            canManagePosts={canManagePosts}
           />
         )}
       </div>

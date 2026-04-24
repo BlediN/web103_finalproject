@@ -7,6 +7,7 @@ export default function EntryModal({
   onDelete,
   onUpdate,
   deleting = false,
+  canManagePosts = false,
 }) {
   const [isEditing, setIsEditing] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -23,7 +24,7 @@ export default function EntryModal({
   });
 
   useEffect(() => {
-    if (!entry) return;
+    if (!entry) return undefined;
 
     const handleEscape = (event) => {
       if (event.key === "Escape") {
@@ -39,6 +40,7 @@ export default function EntryModal({
       document.body.style.overflow = "auto";
     };
   }, [entry, onClose]);
+
 
   useEffect(() => {
     if (!entry) return;
@@ -78,6 +80,10 @@ export default function EntryModal({
 
   const handleSave = async () => {
     if (saving) return;
+    if (!canManagePosts) {
+      alert("Please log in to edit posts.");
+      return;
+    }
 
     if (
       !editForm.role.trim() ||
@@ -142,14 +148,14 @@ export default function EntryModal({
       <div
         onClick={(e) => e.stopPropagation()}
         style={{
-          backgroundColor: "#ffffff",
+          backgroundColor: "#0f172a",
           borderRadius: "20px",
           width: "100%",
           maxWidth: "720px",
           maxHeight: "90vh",
           overflowY: "auto",
-          boxShadow: "0 20px 50px rgba(15, 23, 42, 0.25)",
-          border: "1px solid #e5e7eb",
+          boxShadow: "0 20px 50px rgba(2, 6, 23, 0.75)",
+          border: "1px solid #334155",
           padding: "1.75rem",
           position: "relative",
         }}
@@ -164,9 +170,9 @@ export default function EntryModal({
             width: "42px",
             height: "42px",
             borderRadius: "12px",
-            border: "1px solid #d1d5db",
-            backgroundColor: "#f8fafc",
-            color: "#334155",
+            border: "1px solid #475569",
+            backgroundColor: "#1e293b",
+            color: "#e2e8f0",
             fontSize: "1.2rem",
             fontWeight: 700,
             cursor: "pointer",
@@ -184,12 +190,12 @@ export default function EntryModal({
                   marginBottom: "0.35rem",
                   fontSize: "2rem",
                   fontWeight: 800,
-                  color: "#0f172a",
+                  color: "#e2e8f0",
                   lineHeight: 1.2,
                 }}
               >
                 {entry.role || "Unknown role"}{" "}
-                <span style={{ color: "#2563eb" }}>
+                <span style={{ color: "#93c5fd" }}>
                   @ {entry.company_name || "Unknown company"}
                 </span>
               </h2>
@@ -198,7 +204,7 @@ export default function EntryModal({
                 style={{
                   marginTop: 0,
                   marginBottom: "1.5rem",
-                  color: "#64748b",
+                  color: "#94a3b8",
                   fontSize: "1rem",
                 }}
               >
@@ -210,7 +216,7 @@ export default function EntryModal({
                   style={{
                     marginTop: "-0.75rem",
                     marginBottom: "1.25rem",
-                    color: "#475569",
+                    color: "#cbd5e1",
                     fontSize: "0.95rem",
                     fontWeight: 600,
                   }}
@@ -259,8 +265,8 @@ export default function EntryModal({
                 <div
                   key={label}
                   style={{
-                    backgroundColor: "#f8fafc",
-                    border: "1px solid #e5e7eb",
+                    backgroundColor: "#111827",
+                    border: "1px solid #334155",
                     borderRadius: "14px",
                     padding: "1rem",
                   }}
@@ -269,7 +275,7 @@ export default function EntryModal({
                     style={{
                       fontSize: "0.85rem",
                       fontWeight: 700,
-                      color: "#64748b",
+                      color: "#94a3b8",
                       marginBottom: "0.35rem",
                       textTransform: "uppercase",
                       letterSpacing: "0.03em",
@@ -280,7 +286,7 @@ export default function EntryModal({
                   <div
                     style={{
                       fontSize: "1rem",
-                      color: "#0f172a",
+                      color: "#e2e8f0",
                       fontWeight: 600,
                     }}
                   >
@@ -292,8 +298,8 @@ export default function EntryModal({
 
             <div
               style={{
-                backgroundColor: "#f8fafc",
-                border: "1px solid #e5e7eb",
+                backgroundColor: "#111827",
+                border: "1px solid #334155",
                 borderRadius: "16px",
                 padding: "1.15rem",
                 marginBottom: "1.25rem",
@@ -303,7 +309,7 @@ export default function EntryModal({
                 style={{
                   fontSize: "1rem",
                   fontWeight: 700,
-                  color: "#334155",
+                  color: "#cbd5e1",
                   marginBottom: "0.75rem",
                 }}
               >
@@ -313,7 +319,7 @@ export default function EntryModal({
               <p
                 style={{
                   margin: 0,
-                  color: "#0f172a",
+                  color: "#e2e8f0",
                   fontSize: "1rem",
                   lineHeight: 1.7,
                   whiteSpace: "pre-wrap",
@@ -337,9 +343,9 @@ export default function EntryModal({
                 style={{
                   padding: "0.75rem 1rem",
                   borderRadius: "10px",
-                  border: "1px solid #cbd5e1",
-                  backgroundColor: "#ffffff",
-                  color: "#334155",
+                  border: "1px solid #475569",
+                  backgroundColor: "#1e293b",
+                  color: "#e2e8f0",
                   fontWeight: 600,
                   cursor: "pointer",
                 }}
@@ -347,7 +353,7 @@ export default function EntryModal({
                 Close
               </button>
 
-              {!entry.is_external && (
+              {!entry.is_external && canManagePosts && (
                 <button
                   onClick={() => setIsEditing(true)}
                   disabled={saving || deleting}
@@ -365,7 +371,7 @@ export default function EntryModal({
                 </button>
               )}
 
-              {!entry.is_external && (
+              {!entry.is_external && canManagePosts && (
                 <button
                   onClick={() => onDelete?.(entry.id)}
                   disabled={deleting || saving}
@@ -394,7 +400,7 @@ export default function EntryModal({
                   marginBottom: "0.35rem",
                   fontSize: "2rem",
                   fontWeight: 800,
-                  color: "#0f172a",
+                  color: "#e2e8f0",
                   lineHeight: 1.2,
                 }}
               >
@@ -404,7 +410,7 @@ export default function EntryModal({
               <p
                 style={{
                   marginTop: 0,
-                  color: "#64748b",
+                  color: "#94a3b8",
                   fontSize: "1rem",
                 }}
               >
@@ -479,7 +485,7 @@ export default function EntryModal({
                   display: "flex",
                   alignItems: "center",
                   gap: "0.55rem",
-                  color: "#334155",
+                  color: "#cbd5e1",
                   fontWeight: 500,
                 }}
               >
@@ -519,9 +525,9 @@ export default function EntryModal({
                 style={{
                   padding: "0.75rem 1rem",
                   borderRadius: "10px",
-                  border: "1px solid #cbd5e1",
-                  backgroundColor: "#ffffff",
-                  color: "#334155",
+                  border: "1px solid #475569",
+                  backgroundColor: "#1e293b",
+                  color: "#e2e8f0",
                   fontWeight: 600,
                   cursor: "pointer",
                 }}
@@ -557,9 +563,9 @@ const inputStyle = {
   width: "100%",
   padding: "0.9rem 1rem",
   borderRadius: "10px",
-  border: "1px solid #cbd5e1",
+  border: "1px solid #475569",
   fontSize: "1rem",
-  color: "#0f172a",
-  backgroundColor: "#ffffff",
+  color: "#e2e8f0",
+  backgroundColor: "#0b1220",
   boxSizing: "border-box",
 };

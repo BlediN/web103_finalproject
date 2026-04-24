@@ -38,8 +38,8 @@ export default function useFeedFilters(entries) {
         return matchesCompany && matchesJobType && matchesSearch;
       })
       .sort((a, b) => {
-        const dateA = new Date(a.layoff_date);
-        const dateB = new Date(b.layoff_date);
+        const dateA = new Date(a.created_at || a.updated_at || a.layoff_date || 0);
+        const dateB = new Date(b.created_at || b.updated_at || b.layoff_date || 0);
 
         return sortOrder === "newest" ? dateB - dateA : dateA - dateB;
       });

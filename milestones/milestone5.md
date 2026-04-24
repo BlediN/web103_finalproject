@@ -28,7 +28,7 @@ Complete the checklist below detailing each baseline, custom, and stretch featur
 - [x] The project includes these backend-specific features:
   - [x] At least one of each of the following database relationships in Postgres
     - [x] one-to-many
-    - [ ] many-to-many with a join table
+    - [x] many-to-many with a join table
   - [x] A well-designed RESTful API that:
     - [x] supports all four main request types for a single entity (ex. tasks in a to-do list app): GET, POST, PATCH, and DELETE
       - [x] the user can **view** items, such as tasks
@@ -45,16 +45,16 @@ Complete the checklist below detailing each baseline, custom, and stretch featur
     - [x] Components broken down into categories, including Page and Component types
     - [x] Corresponding container components and presenter components as appropriate
 - [x] The project includes dynamic routes for both frontend and backend apps
-- [ ] The project is deployed on Supabase with all pages and features that are visible to the user are working as intended
+- [ ] The project is deployed on GitHub with all pages and features that are visible to the user are working as intended
 
 ### Custom Features
 
 👉🏾👉🏾👉🏾 Check off each completed feature below.
 
 - [x] The project gracefully handles errors
-- [ ] The project includes a one-to-one database relationship
+- [x] The project includes a one-to-one database relationship
 - [x] The project includes a slide-out pane or modal as appropriate for your use case that pops up and covers the page content without navigating away from the current page
-- [ ] The project includes a unique field within the join table
+- [x] The project includes a unique field within the join table
 - [x] The project includes a custom non-RESTful route with corresponding controller actions
 - [x] The user can filter or sort items based on particular criteria as appropriate for your use case
 - [x] Data is automatically generated in response to a certain event or user action. Examples include generating a default inventory for a new user starting a game or creating a starter set of tasks for a user creating a new task app account
@@ -65,18 +65,19 @@ Complete the checklist below detailing each baseline, custom, and stretch featur
 
 👉🏾👉🏾👉🏾 Check off each completed feature below.
 
-- [ ] A subset of pages require the user to log in before accessing the content
+- [x] A subset of pages require the user to log in before accessing the content
+  - [x] A subset of pages require the user to log in before accessing the content
   - [ ] Users can log in and log out via GitHub OAuth with Passport.js
 - [ ] Restrict available user options dynamically, such as restricting available purchases based on a user's currency
-- [ ] Show a spinner while a page or page element is loading
+- [x] Show a spinner while a page or page element is loading
 - [x] Disable buttons and inputs during the form submission process
-- [ ] Disable buttons after they have been clicked
+- [x] Disable buttons after they have been clicked
   - *At least 75% of buttons in your app must exhibit this behavior to receive full credit*
 - [ ] Users can upload images to the app and have them be stored on a cloud service
   - *A user profile picture does **NOT** count for this rubric item **only if** the app also includes "Login via GitHub" functionality.*
   - *Adding a photo via a URL does **NOT** count for this rubric item (for example, if the user provides a URL with an image to attach it to the post).*
   - *Selecting a photo from a list of provided photos does **NOT** count for this rubric item.*
-- [ ] 🍞 [Toast messages](https://www.patternfly.org/v3/pattern-library/communication/toast-notifications/index.html) deliver simple feedback in response to user events
+- [x] 🍞 [Toast messages](https://www.patternfly.org/v3/pattern-library/communication/toast-notifications/index.html) deliver simple feedback in response to user events
 
 ## Final Demo GIF
 
@@ -86,20 +87,20 @@ Complete the checklist below detailing each baseline, custom, and stretch featur
 
 ### 1. What went well during this unit?
 
-[👉🏾👉🏾👉🏾 your answer here]
+We finished most core features and got the app working from frontend to backend.
 
 ### 2. What were some challenges your group faced in this unit?
 
-[👉🏾👉🏾👉🏾 your answer here]
+We ran into issues with styling consistency, auth logic, and frontend/backend sync.
 
 ### 3. What were some of the highlights or achievements that you are most proud of in this project?
 
-[👉🏾👉🏾👉🏾 your answer here]
+I am proud that we built full CRUD, filtering/sorting, modals, and data validation.
 
 ### 4. Reflecting on your web development journey so far, how have you grown since the beginning of the course?
 
-[👉🏾👉🏾👉🏾 your answer here]
+I got better at debugging, structuring code, and connecting React with Express and Postgres.
 
 ### 5. Looking ahead, what are your goals related to web development, and what steps do you plan to take to achieve them?
 
-[👉🏾👉🏾👉🏾 your answer here]
+My goal is to build cleaner full-stack apps with better UX. I will keep practicing through small projects and improve testing and auth/security skills.
