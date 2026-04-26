@@ -2,6 +2,7 @@ import { useState, useContext } from "react";
 import { BrowserRouter, Routes, Route, Link, useNavigate } from "react-router-dom";
 import axios from "axios";
 import FeedPage from "./pages/FeedPage";
+import StatsPage from "./pages/StatsPage";
 import SubmitEntryPage from "./pages/SubmitEntryPage";
 import CompanyPage from "./pages/CompanyPage";
 import LoginPage from "./pages/LoginPage";
@@ -137,6 +138,7 @@ function AppShell() {
             </span>
           )}
           <Link to="/submit">Submit Entry</Link>
+          <Link to="/stats">Stats</Link>
         </nav>
 
         <Routes>
@@ -144,6 +146,7 @@ function AppShell() {
           <Route path="/login" element={<LoginPage />} />
           <Route path="/submit" element={<SubmitEntryPage />} />
           <Route path="/company/:companyName" element={<CompanyPage />} />
+          <Route path="/stats" element={<StatsPage />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </div>

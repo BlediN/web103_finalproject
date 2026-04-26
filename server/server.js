@@ -4,6 +4,7 @@ import cors from "cors";
 import companyRoutes from "./routes/companies.js";
 import entryRoutes from "./routes/entries.js";
 import resetRoutes from "./routes/reset.js";
+import statsRoutes from "./routes/stats.js";
 import tagRoutes from "./routes/tags.js";
 import userProfileRoutes from "./routes/user-profiles.js";
 
@@ -21,6 +22,7 @@ app.get("/", (req, res) => {
 app.use("/api/companies", companyRoutes);
 app.use("/api/entries", entryRoutes);
 app.use("/api/reset", resetRoutes);
+app.use("/api/stats", statsRoutes);
 app.use("/api/tags", tagRoutes);
 app.use("/api/user-profiles", userProfileRoutes);
 
