@@ -23,7 +23,7 @@ import './StatsPage.css';
 
 /* ------------------ CONFIG ------------------ */
 
-const API_URL = 'http://localhost:3001/api/stats';
+const API_URL = '/api/stats';
 
 const COLORS = ['#60a5fa', '#34d399', '#fbbf24', '#f472b6', '#a78bfa'];
 

@@ -14,6 +14,7 @@ export default function FeedPage() {
   const location = useLocation();
   const { user, isGuest } = useContext(AuthContext);
   const canManagePosts = Boolean(user) && !isGuest;
+  const cacheKey = user ? `feedEntries-auth-${user.id}` : "feedEntries-public";
 
   const [entries, setEntries] = useState([]);
   const [selectedEntry, setSelectedEntry] = useState(null);
@@ -27,22 +28,22 @@ export default function FeedPage() {
       setLoading(true);
 
       if (!forceRefresh) {
-        const cachedEntries = sessionStorage.getItem("feedEntries");
+        const cachedEntries = sessionStorage.getItem(cacheKey);
         if (cachedEntries) {
           setEntries(JSON.parse(cachedEntries));
           return;
         }
       }
 
-      const response = await axios.get("http://localhost:3001/api/entries");
+      const response = await axios.get("/api/entries");
       setEntries(response.data);
-      sessionStorage.setItem("feedEntries", JSON.stringify(response.data));
+      sessionStorage.setItem(cacheKey, JSON.stringify(response.data));
     } catch (error) {
       console.error("Error fetching entries:", error);
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [cacheKey]);
 
   useEffect(() => {
     fetchEntries(false);
@@ -108,7 +109,7 @@ export default function FeedPage() {
 
     try {
       setDeleting(true);
-      await axios.delete(`http://localhost:3001/api/entries/${id}`);
+      await axios.delete(`/api/entries/${id}`);
       await fetchEntries(true);
       setSelectedEntry(null);
       setSuccessMessage("Story deleted successfully.");
@@ -126,7 +127,7 @@ export default function FeedPage() {
     }
 
     try {
-      await axios.patch(`http://localhost:3001/api/entries/${id}`, updatedData);
+      await axios.patch(`/api/entries/${id}`, updatedData);
       await fetchEntries(true);
       setSelectedEntry(null);
       setSuccessMessage("Story updated successfully.");

@@ -45,7 +45,7 @@ Complete the checklist below detailing each baseline, custom, and stretch featur
     - [x] Components broken down into categories, including Page and Component types
     - [x] Corresponding container components and presenter components as appropriate
 - [x] The project includes dynamic routes for both frontend and backend apps
-- [ ] The project is deployed on GitHub with all pages and features that are visible to the user are working as intended
+- [x] The project is deployed on GitHub with all pages and features that are visible to the user are working as intended
 
 ### Custom Features
 
@@ -67,8 +67,8 @@ Complete the checklist below detailing each baseline, custom, and stretch featur
 
 - [x] A subset of pages require the user to log in before accessing the content
   - [x] A subset of pages require the user to log in before accessing the content
-  - [ ] Users can log in and log out via GitHub OAuth with Passport.js
-- [ ] Restrict available user options dynamically, such as restricting available purchases based on a user's currency
+  - [x] Users can log in and log out via GitHub OAuth with Passport.js
+- [x] Restrict available user options dynamically, such as restricting available purchases based on a user's currency
 - [x] Show a spinner while a page or page element is loading
 - [x] Disable buttons and inputs during the form submission process
 - [x] Disable buttons after they have been clicked

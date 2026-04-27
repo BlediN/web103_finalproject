@@ -22,7 +22,7 @@ export default function CompanyPage() {
 
   const fetchEntries = async () => {
     try {
-      const response = await axios.get("http://localhost:3001/api/entries");
+      const response = await axios.get("/api/entries");
       setEntries(response.data);
     } catch (error) {
       console.error("Error fetching entries:", error);
@@ -56,7 +56,7 @@ export default function CompanyPage() {
 
     try {
       setDeleting(true);
-      await axios.delete(`http://localhost:3001/api/entries/${id}`);
+      await axios.delete(`/api/entries/${id}`);
       await fetchEntries();
       setSelectedEntry(null);
       setSuccessMessage("Story deleted successfully.");
@@ -74,7 +74,7 @@ export default function CompanyPage() {
     }
 
     try {
-      await axios.patch(`http://localhost:3001/api/entries/${id}`, updatedData);
+      await axios.patch(`/api/entries/${id}`, updatedData);
       await fetchEntries();
       setSelectedEntry(null);
       setSuccessMessage("Story updated successfully.");

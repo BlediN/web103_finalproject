@@ -42,7 +42,7 @@ function AppShell() {
 
     try {
       setImportingFeed(true);
-      const response = await axios.post("http://localhost:3001/api/entries/import/gdelt");
+      const response = await axios.post("/api/entries/import/gdelt");
       const importedCount = Number(response?.data?.importedCount);
 
       if (Number.isFinite(importedCount)) {

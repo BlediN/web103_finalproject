@@ -49,8 +49,8 @@ export default function LoginPage() {
 
     try {
       const endpoint = isRegistering
-        ? "http://localhost:3001/api/users/register"
-        : "http://localhost:3001/api/users/login";
+        ? "/api/users/register"
+        : "/api/users/login";
 
       const payload = isRegistering
         ? { username: trimmedUsername, email: trimmedEmail, password }
@@ -104,7 +104,7 @@ export default function LoginPage() {
         <div className="card">
           <h1 style={{ color: "#0f172a", marginBottom: "1rem" }}>Guest Mode Active</h1>
           <p style={{ color: "#64748b", marginBottom: "1.5rem" }}>
-            Guests can browse and submit stories but cannot edit or delete.
+            Guests can browse imported stories, but submitting and managing stories requires login.
           </p>
           <button
             onClick={() => navigate("/")}

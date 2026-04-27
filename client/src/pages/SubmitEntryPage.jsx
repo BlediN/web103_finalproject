@@ -35,7 +35,7 @@ export default function SubmitEntryPage() {
   useEffect(() => {
     const fetchCompanies = async () => {
       try {
-        const response = await axios.get("http://localhost:3001/api/companies");
+        const response = await axios.get("/api/companies");
         setCompanies(response.data);
       } catch (error) {
         console.error("Error fetching companies:", error);
@@ -96,6 +96,13 @@ export default function SubmitEntryPage() {
     if (submitting) return;
 
     setErrorMessage("");
+
+    if (!user || isGuest) {
+      setErrorMessage("Please log in to submit a story.");
+      navigate("/login");
+      return;
+    }
+
     setSubmitting(true);
 
     try {
@@ -103,7 +110,7 @@ export default function SubmitEntryPage() {
       const customCompanyName = formData.custom_company_name.trim();
 
       if (!companyId && customCompanyName) {
-        const companyResponse = await axios.post("http://localhost:3001/api/companies", {
+        const companyResponse = await axios.post("/api/companies", {
           name: customCompanyName,
         });
         companyId = Number(companyResponse.data.id);
@@ -115,9 +122,8 @@ export default function SubmitEntryPage() {
         return;
       }
 
-      await axios.post("http://localhost:3001/api/entries", {
+      await axios.post("/api/entries", {
         ...formData,
-        user_id: !isGuest && user?.id ? Number(user.id) : 1,
         company_id: companyId,
         severance_weeks: Number(formData.severance_weeks),
         job_search_weeks: Number(formData.job_search_weeks),

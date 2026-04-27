@@ -122,38 +122,64 @@ const EntryModel = {
     `);
   },
 
-  async getAll() {
+  async getAll({ includeInternal = false } = {}) {
     await this.ensureExternalTable();
 
-    const query = `
-      SELECT *
-      FROM (
-        SELECT
-          e.id::text AS id,
-          e.user_id,
-          e.company_id,
-          e.role,
-          e.job_type,
-          e.location,
-          e.severance_weeks,
-          e.layoff_date,
-          e.job_search_weeks,
-          e.is_anonymous,
-          e.summary,
-          e.created_at,
-          e.updated_at,
-          c.name AS company_name,
-          u.username,
-          NULL::text AS source_url,
-          NULL::text AS source_name,
-          'user'::text AS source_type,
-          false AS is_external
-        FROM entries e
-        JOIN companies c ON e.company_id = c.id
-        LEFT JOIN users u ON e.user_id = u.id
+    const query = includeInternal
+      ? `
+        SELECT *
+        FROM (
+          SELECT
+            e.id::text AS id,
+            e.user_id,
+            e.company_id,
+            e.role,
+            e.job_type,
+            e.location,
+            e.severance_weeks,
+            e.layoff_date,
+            e.job_search_weeks,
+            e.is_anonymous,
+            e.summary,
+            e.created_at,
+            e.updated_at,
+            c.name AS company_name,
+            u.username,
+            NULL::text AS source_url,
+            NULL::text AS source_name,
+            'user'::text AS source_type,
+            false AS is_external
+          FROM entries e
+          JOIN companies c ON e.company_id = c.id
+          LEFT JOIN users u ON e.user_id = u.id
 
-        UNION ALL
+          UNION ALL
 
+          SELECT
+            CONCAT('ext-', ex.id)::text AS id,
+            NULL::int AS user_id,
+            NULL::int AS company_id,
+            ex.role,
+            ex.job_type,
+            ex.location,
+            NULL::int AS severance_weeks,
+            ex.layoff_date,
+            NULL::int AS job_search_weeks,
+            true AS is_anonymous,
+            ex.summary,
+            ex.created_at,
+            ex.updated_at,
+            ex.company_name,
+            ex.source_name AS username,
+            ex.source_url,
+            ex.source_name,
+            ex.source_type,
+            true AS is_external
+          FROM external_entries ex
+        ) merged_entries
+        ORDER BY layoff_date DESC, created_at DESC;
+      `
+      : `
         SELECT
           CONCAT('ext-', ex.id)::text AS id,
           NULL::int AS user_id,
@@ -175,9 +201,8 @@ const EntryModel = {
           ex.source_type,
           true AS is_external
         FROM external_entries ex
-      ) merged_entries
-      ORDER BY layoff_date DESC, created_at DESC;
-    `;
+        ORDER BY ex.layoff_date DESC, ex.created_at DESC;
+      `;
 
     const result = await pool.query(query);
     return result.rows;

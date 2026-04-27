@@ -3,7 +3,8 @@ import EntryModel from "../models/EntryModel.js";
 class EntryController {
   static async getEntries(req, res) {
     try {
-      const entries = await EntryModel.getAll();
+      const isAuthenticated = Boolean(req.isAuthenticated && req.isAuthenticated());
+      const entries = await EntryModel.getAll({ includeInternal: isAuthenticated });
       res.status(200).json(entries);
     } catch (error) {
       console.error("Error fetching entries:", error);
@@ -29,8 +30,12 @@ class EntryController {
 
   static async createEntry(req, res) {
     try {
+      const isAuthenticated = Boolean(req.isAuthenticated && req.isAuthenticated());
+      if (!isAuthenticated) {
+        return res.status(401).json({ error: "Authentication required." });
+      }
+
       const {
-        user_id,
         company_id,
         role,
         job_type,
@@ -45,7 +50,7 @@ class EntryController {
       const isBlank = (value) =>
         value === undefined || value === null || String(value).trim() === "";
 
-      const parsedUserId = Number(user_id);
+      const parsedUserId = Number(req.user?.id);
       const parsedCompanyId = Number(company_id);
       const parsedSeveranceWeeks = Number(severance_weeks);
       const parsedJobSearchWeeks = Number(job_search_weeks);
@@ -125,6 +130,11 @@ class EntryController {
 
   static async updateEntry(req, res) {
     try {
+      const isAuthenticated = Boolean(req.isAuthenticated && req.isAuthenticated());
+      if (!isAuthenticated) {
+        return res.status(401).json({ error: "Authentication required." });
+      }
+
       const { entryId } = req.params;
       const updatedEntry = await EntryModel.updateOne(entryId, req.body);
 
@@ -141,6 +151,11 @@ class EntryController {
 
   static async deleteEntry(req, res) {
     try {
+      const isAuthenticated = Boolean(req.isAuthenticated && req.isAuthenticated());
+      if (!isAuthenticated) {
+        return res.status(401).json({ error: "Authentication required." });
+      }
+
       const { entryId } = req.params;
 
       if (String(entryId).startsWith("ext-")) {

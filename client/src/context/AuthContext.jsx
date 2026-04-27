@@ -1,4 +1,5 @@
 import { createContext, useState, useEffect } from "react";
+import axios from "axios";
 
 export const AuthContext = createContext();
 
@@ -7,24 +8,33 @@ export function AuthProvider({ children }) {
   const [isGuest, setIsGuest] = useState(false);
   const [loading, setLoading] = useState(true);
 
-  // Check if user is already logged in (from localStorage)
   useEffect(() => {
-    const storedUser = localStorage.getItem("currentUser");
-    const storedIsGuest = localStorage.getItem("isGuest");
+    const restoreSession = async () => {
+      try {
+        const storedIsGuest = localStorage.getItem("isGuest");
 
-    if (storedIsGuest === "true") {
-      setIsGuest(true);
-    } else if (storedUser) {
-      setUser(JSON.parse(storedUser));
-    }
+        if (storedIsGuest === "true") {
+          setIsGuest(true);
+          return;
+        }
 
-    setLoading(false);
+        const response = await axios.get("/api/users/me");
+        if (response.data?.user) {
+          setUser(response.data.user);
+        }
+      } catch (error) {
+        console.error("Failed to restore auth session:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    restoreSession();
   }, []);
 
   const loginUser = (userData) => {
     setUser(userData);
     setIsGuest(false);
-    localStorage.setItem("currentUser", JSON.stringify(userData));
     localStorage.removeItem("isGuest");
   };
 
@@ -32,13 +42,17 @@ export function AuthProvider({ children }) {
     setUser(null);
     setIsGuest(true);
     localStorage.setItem("isGuest", "true");
-    localStorage.removeItem("currentUser");
   };
 
-  const logout = () => {
+  const logout = async () => {
+    try {
+      await axios.post("/api/users/logout");
+    } catch (error) {
+      console.error("Failed to log out from server session:", error);
+    }
+
     setUser(null);
     setIsGuest(false);
-    localStorage.removeItem("currentUser");
     localStorage.removeItem("isGuest");
   };
 

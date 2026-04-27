@@ -1,33 +1,14 @@
 import express from "express";
 import crypto from "crypto";
+import passport from "passport";
 import pool from "../config/database.js";
+import {
+  ensureAuthColumns,
+  hashPassword,
+  safeUser,
+} from "../config/passport.js";
 
 const router = express.Router();
-
-const HASH_ITERATIONS = 100000;
-const HASH_KEY_LENGTH = 64;
-const HASH_DIGEST = "sha512";
-
-const hashPassword = (password, salt) =>
-  crypto
-    .pbkdf2Sync(password, salt, HASH_ITERATIONS, HASH_KEY_LENGTH, HASH_DIGEST)
-    .toString("hex");
-
-const safeUser = (row) => ({
-  id: row.id,
-  username: row.username,
-  email: row.email,
-  created_at: row.created_at,
-});
-
-const ensureAuthColumns = async () => {
-  await pool.query(`
-    ALTER TABLE users
-    ADD COLUMN IF NOT EXISTS email VARCHAR,
-    ADD COLUMN IF NOT EXISTS password_hash VARCHAR,
-    ADD COLUMN IF NOT EXISTS password_salt VARCHAR;
-  `);
-};
 
 router.post("/register", async (req, res) => {
   const { username, email, password } = req.body;
@@ -81,55 +62,69 @@ router.post("/register", async (req, res) => {
       ]
     );
 
-    return res.status(201).json({ user: safeUser(result.rows[0]) });
+    const createdUser = safeUser(result.rows[0]);
+
+    req.login(createdUser, (loginError) => {
+      if (loginError) {
+        console.error("Error creating login session after registration:", loginError);
+        return res.status(500).json({ error: "Failed to create login session." });
+      }
+
+      return res.status(201).json({ user: createdUser });
+    });
   } catch (error) {
     console.error("Error registering user:", error);
     return res.status(500).json({ error: "Failed to register user." });
   }
 });
 
-router.post("/login", async (req, res) => {
-  const { username, password } = req.body;
-
-  if (!username || !username.trim()) {
-    return res.status(400).json({ error: "Username is required." });
-  }
-
-  if (!password) {
-    return res.status(400).json({ error: "Password is required." });
-  }
-
-  try {
-    await ensureAuthColumns();
-
-    const normalizedUsername = username.trim();
-    const result = await pool.query(
-      `SELECT id, username, email, password_hash, password_salt, created_at
-       FROM users
-       WHERE LOWER(username) = LOWER($1)
-       LIMIT 1`,
-      [normalizedUsername]
-    );
-
-    if (result.rows.length === 0) {
-      return res.status(404).json({ error: "User not found." });
+router.post("/login", (req, res, next) => {
+  passport.authenticate("local", (error, user, info) => {
+    if (error) {
+      console.error("Error authenticating user:", error);
+      return res.status(500).json({ error: "Failed to log in." });
     }
 
-    const user = result.rows[0];
-    if (!user.password_hash || !user.password_salt) {
-      return res.status(401).json({ error: "Invalid username or password." });
+    if (!user) {
+      return res.status(401).json({ error: info?.message || "Invalid username or password." });
     }
 
-    const inputHash = hashPassword(password, user.password_salt);
-    if (inputHash !== user.password_hash) {
-      return res.status(401).json({ error: "Invalid username or password." });
+    req.login(user, (loginError) => {
+      if (loginError) {
+        console.error("Error creating login session:", loginError);
+        return res.status(500).json({ error: "Failed to create login session." });
+      }
+
+      return res.status(200).json({ user });
+    });
+  })(req, res, next);
+});
+
+router.post("/logout", (req, res) => {
+  req.logout((error) => {
+    if (error) {
+      console.error("Error logging out user:", error);
+      return res.status(500).json({ error: "Failed to log out." });
     }
 
-    return res.status(200).json({ user: safeUser(user) });
-  } catch (error) {
-    console.error("Error logging in user:", error);
-    return res.status(500).json({ error: "Failed to log in." });
+    req.session.destroy((sessionError) => {
+      if (sessionError) {
+        console.error("Error destroying session:", sessionError);
+        return res.status(500).json({ error: "Failed to clear session." });
+      }
+
+      res.clearCookie("connect.sid");
+      return res.status(200).json({ message: "Logged out successfully." });
+    });
+  });
+});
+
+router.get("/me", (req, res) => {
+  if (!req.isAuthenticated || !req.isAuthenticated()) {
+    return res.status(200).json({ user: null });
   }
+
+  return res.status(200).json({ user: safeUser(req.user) });
 });
 
 router.get("/", async (req, res) => {
