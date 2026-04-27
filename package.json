@@ -8,9 +8,9 @@
     "dev": "concurrently -k -n server,client -c blue,green \"npm run dev:server\" \"npm run dev:client\"",
     "dev:server": "npm --prefix server start",
     "dev:client": "npm --prefix client run dev",
-    "start": "nodemon --require dotenv/config server.js",
-    "reset": "node --require dotenv/config config/reset.js",
-    "seed": "node --require dotenv/config config/seed.js"
+    "start": "npm --prefix server start",
+    "reset": "npm --prefix server run reset",
+    "seed": "npm --prefix server run seed"
   },
   "dependencies": {
     "axios": "^1.15.0",
