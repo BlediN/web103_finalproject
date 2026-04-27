@@ -4,6 +4,8 @@ import { execFile } from "child_process";
 import { promisify } from "util";
 
 const execFileAsync = promisify(execFile);
+const GDELT_TIMEOUT_SECONDS = Number(process.env.GDELT_TIMEOUT_SECONDS || 60);
+const GDELT_RETRY_ATTEMPTS = Number(process.env.GDELT_RETRY_ATTEMPTS || 2);
 
 const GDELT_QUERY = `(layoff OR layoffs OR \"job cuts\" OR \"workforce reduction\")`;
 
@@ -30,11 +32,77 @@ async function fetchJsonWithCurl(url) {
     "--show-error",
     "--location",
     "--max-time",
-    "60",
+    String(GDELT_TIMEOUT_SECONDS),
     url,
   ]);
 
   return JSON.parse(stdout || "{}");
+}
+
+async function fetchJsonWithNodeFetch(url) {
+  const controller = new AbortController();
+  const timeoutId = setTimeout(
+    () => controller.abort(),
+    GDELT_TIMEOUT_SECONDS * 1000
+  );
+
+  try {
+    const response = await fetch(url, {
+      method: "GET",
+      signal: controller.signal,
+      headers: {
+        Accept: "application/json",
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error(`GDELT responded with status ${response.status}`);
+    }
+
+    return await response.json();
+  } finally {
+    clearTimeout(timeoutId);
+  }
+}
+
+async function fetchGdeltPayload(url) {
+  try {
+    return await fetchJsonWithCurl(url);
+  } catch (curlError) {
+    try {
+      return await fetchJsonWithNodeFetch(url);
+    } catch (fetchError) {
+      const timeoutMessage =
+        curlError?.code === 28 || fetchError?.name === "AbortError"
+          ? `GDELT request timed out after ${GDELT_TIMEOUT_SECONDS} seconds.`
+          : "GDELT request failed.";
+
+      const error = new Error(timeoutMessage);
+      error.cause = {
+        curlError: curlError?.message || String(curlError),
+        fetchError: fetchError?.message || String(fetchError),
+      };
+      throw error;
+    }
+  }
+}
+
+async function fetchGdeltPayloadWithRetry(url) {
+  let lastError;
+
+  for (let attempt = 1; attempt <= GDELT_RETRY_ATTEMPTS; attempt += 1) {
+    try {
+      return await fetchGdeltPayload(url);
+    } catch (error) {
+      lastError = error;
+
+      if (attempt < GDELT_RETRY_ATTEMPTS) {
+        await new Promise((resolve) => setTimeout(resolve, attempt * 1000));
+      }
+    }
+  }
+
+  throw lastError;
 }
 
 function inferCompanyName(article) {
@@ -347,7 +415,7 @@ const EntryModel = {
   async importNewsFeed() {
     await this.ensureExternalTable();
 
-    const payload = await fetchJsonWithCurl(buildGdeltUrl());
+    const payload = await fetchGdeltPayloadWithRetry(buildGdeltUrl());
     const articles = Array.isArray(payload?.articles)
       ? payload.articles
       : Array.isArray(payload?.results)
