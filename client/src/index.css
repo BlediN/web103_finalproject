@@ -1,0 +1,90 @@
+:root {
+  --bg: #020617;
+  --surface: #0f172a;
+  --text: #e2e8f0;
+  --muted: #cbd5e1;
+  --border: #334155;
+  --focus: #7dd3fc;
+  --page-max-width: 980px;
+  --card-shadow: 0 10px 24px rgba(2, 6, 23, 0.55);
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  font-size: 18px;
+  line-height: 1.6;
+  color-scheme: dark;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+}
+
+#root {
+  width: 100%;
+  max-width: 100%;
+  margin: 0 auto;
+  min-height: 100svh;
+}
+
+h1,
+h2,
+h3,
+h4,
+label,
+strong {
+  color: var(--text);
+}
+
+p,
+small,
+li,
+span {
+  color: var(--muted);
+}
+
+a {
+  color: #93c5fd;
+}
+
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  outline: 3px solid var(--focus);
+  outline-offset: 2px;
+}
+
+button {
+  font-size: 1rem;
+}
+
+input,
+select,
+textarea {
+  background: #0b1220;
+  color: #e2e8f0;
+  border: 1px solid var(--border);
+}
+
+::placeholder {
+  color: #94a3b8;
+  opacity: 1;
+}
+
+::selection {
+  background: #1d4ed8;
+  color: #e2e8f0;
+}
+
+@media (max-width: 900px) {
+  :root {
+    font-size: 17px;
+  }
+}
